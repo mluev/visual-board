@@ -19,6 +19,14 @@ import { SpotMistake } from './blocks/SpotMistake/SpotMistake';
 import { Venn } from './blocks/Venn/Venn';
 import { LabelDiagram } from './blocks/LabelDiagram/LabelDiagram';
 import { ListenType } from './blocks/ListenType/ListenType';
+import { LineChart } from './blocks/LineChart/LineChart';
+import { FunctionPlot } from './blocks/FunctionPlot/FunctionPlot';
+import { Formula } from './blocks/Formula/Formula';
+import { CompareTable } from './blocks/CompareTable/CompareTable';
+import { PatternTable } from './blocks/PatternTable/PatternTable';
+import { Annotated } from './blocks/Annotated/Annotated';
+import { Timeline } from './blocks/Timeline/Timeline';
+import { Stepper } from './blocks/Stepper/Stepper';
 import { Callout } from './blocks/Callout/Callout';
 import { Stats } from './blocks/Stats/Stats';
 
@@ -41,6 +49,14 @@ export const components: { [K in BlockType]: ComponentType<BlockProps<K>> } = {
   Venn,
   LabelDiagram,
   ListenType,
+  LineChart,
+  FunctionPlot,
+  Formula,
+  CompareTable,
+  PatternTable,
+  Annotated,
+  Timeline,
+  Stepper,
   Callout,
   Stats,
 };

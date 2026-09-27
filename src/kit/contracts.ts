@@ -21,6 +21,14 @@ import { spotMistake } from './blocks/SpotMistake/contract';
 import { venn } from './blocks/Venn/contract';
 import { labelDiagram } from './blocks/LabelDiagram/contract';
 import { listenType } from './blocks/ListenType/contract';
+import { lineChart } from './blocks/LineChart/contract';
+import { functionPlot } from './blocks/FunctionPlot/contract';
+import { formula } from './blocks/Formula/contract';
+import { compareTable } from './blocks/CompareTable/contract';
+import { patternTable } from './blocks/PatternTable/contract';
+import { annotated } from './blocks/Annotated/contract';
+import { timeline } from './blocks/Timeline/contract';
+import { stepper } from './blocks/Stepper/contract';
 import { callout } from './blocks/Callout/contract';
 import { stats } from './blocks/Stats/contract';
 
@@ -43,6 +51,14 @@ export const contracts = {
   Venn: venn,
   LabelDiagram: labelDiagram,
   ListenType: listenType,
+  LineChart: lineChart,
+  FunctionPlot: functionPlot,
+  Formula: formula,
+  CompareTable: compareTable,
+  PatternTable: patternTable,
+  Annotated: annotated,
+  Timeline: timeline,
+  Stepper: stepper,
   Callout: callout,
   Stats: stats,
 } as const;

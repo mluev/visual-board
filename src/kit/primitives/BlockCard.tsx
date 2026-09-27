@@ -48,7 +48,7 @@ export function BlockCard({ tone, pill, title, aside, children, className, style
       tabIndex={tabIndex}
       onKeyDown={onKeyDown}
       style={{ minHeight, ...style }}
-      className={cn('box-border flex h-full flex-col gap-4 rounded-card bg-surface p-6 text-ink shadow-[0_1px_2px_rgba(20,22,30,.06)] outline-none', className)}
+      className={cn('@container box-border flex h-full flex-col gap-4 rounded-card bg-surface p-6 text-ink shadow-[0_1px_2px_rgba(20,22,30,.06)] outline-none', className)}
     >
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">

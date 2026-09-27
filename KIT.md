@@ -59,9 +59,9 @@ Match the subject: code goes in `code` fields; languages, maths and everything e
 ## Blocks
 - **Core:** Explainer, Flashcards, Whiteboard
 - **Check:** Quiz, Test
-- **Charts:** BarChart
+- **Charts:** BarChart, LineChart
 - **Practice (learner produces an answer):** ShortAnswer, Cloze, ExplainBack, WorkedExample, CodeExercise, Matching, OrderSteps, SortBuckets, SpotMistake, LabelDiagram, ListenType
-- **Visual (explore an idea):** Venn
+- **Visual (explore an idea):** Venn, FunctionPlot, Formula, CompareTable, PatternTable, Annotated, Timeline, Stepper
 - **Layout:** Callout, Stats
 
 ## Core
@@ -260,6 +260,44 @@ props: {
   param: { name: "appends", min: 1, max: 64, value: 20 },
   data: n=>[{label:"copies",value:n*2},{label:"appends",value:n}],
   note: (n,d)=>`${n} appends cost ${d[0].value} copies.`,
+} }
+```
+
+### LineChart
+Line chart of one or more series with hover read-out. Optionally live: a slider parameter feeds a function that returns the series.
+**Use when:** Change over time or over a variable: growth, decay, compound interest, temperature, population, comparing curves.
+```ts
+props: {
+  title?: string
+  series: Series[] | (p: number) => Series[]  — Series, or a function of the slider value
+  param?: Param  — Adds a slider; its value is passed to series() and note()
+  note?: string | (p: number, series: Series[]) => string
+  xLabel?: string  — x-axis name, e.g. "years"
+  yMin?: number  — Force the y-axis start (default: min(0, data))
+  unit?: string  — Suffix for y values in the tooltip
+}
+
+  Series = {
+    name: string
+    points: ([number, number])[]  — [x, y] pairs, sorted by x
+    color?: string  — CSS colour. Default: kit series colours
+  }
+  Param = {
+    name: string  — Shown as "name = value"
+    min: number
+    max: number
+    step?: number = 1
+    value: number  — Starting value
+    unit?: string  — Suffix after the value
+  }
+```
+**Variants shown in /kit:** static (Static data)
+```ts
+{ type: 'LineChart', id: '…', props: {
+  title: "Simple vs compound interest on £1,000",
+  xLabel: "years",
+  param: { name: "rate", min: 1, max: 12, step: 0.5, value: 7, unit: "%" },
+  series: r=>[{name:"Compound",points:[...Array(31).keys()].map(y=>[y,1e3*(1+r/100)**y])}],
 } }
 ```
 
@@ -625,6 +663,234 @@ props: {
   title: "Animal traits",
   sets: ["Mammals", "Can fly"],
   items: [{ text: "Dog", in: [0] }, { text: "Bat", in: [0, 1] }, { text: "Eagle", in: [1] }],
+} }
+```
+
+### FunctionPlot
+Plots y = f(x) on a grid with sliders for parameters, a live formula, hover read-out and a note that updates with the parameters.
+**Use when:** Maths and physics: how a, b, c change a graph (parabolas, sine waves, exponentials), comparing functions, seeing roots and intercepts.
+```ts
+props: {
+  title?: string
+  fns: PlotFn[]
+  params?: PlotParam[] = []
+  x?: [number, number] = [-6,6]  — x range
+  y?: [number, number] = [-6,6]  — y range
+  formula?: string | (p) => string  — Shown above the sliders. Default: function names
+  note?: string | (p) => string
+}
+
+  PlotFn = {
+    name: string  — Legend label, e.g. "y = sin(x)"
+    f: (x: number, p: Record<string, number>) => number  — p holds the slider values by name
+    color?: string
+  }
+  PlotParam = {
+    name: string  — Key in p, e.g. "a"
+    min: number
+    max: number
+    step?: number = 0.1
+    value: number
+  }
+```
+**Variants shown in /kit:** compare (Two functions, no parameters)
+```ts
+{ type: 'FunctionPlot', id: '…', props: {
+  title: "Transforming a parabola",
+  params: [{ name: "a", min: -3, max: 3, value: 1 }, { name: "k", min: -5, max: 5, step: 0.5, value: 0 }],
+  fns: [{ name: "y = a·x² + k", f: (x,p)=>p.a*x*x+p.k }],
+  formula: p=>`y = ${p.a}x\xB2 + ${p.k}`,
+} }
+```
+
+### Formula
+A big formula where each named part is explainable (hover or click to highlight it and read what it means), plus an optional "Try it" calculator.
+**Use when:** Introducing any formula or equation: physics, finance, statistics, chemistry. Name every meaningful symbol; leave operators plain.
+```ts
+props: {
+  title?: string
+  parts: FormulaPart[]  — The formula split into parts, left to right
+  calc?: { vars: CalcVar[]; f: (v: Record<string, number>) => number; label?: string }  — Calculator: inputs for vars, result of f(v)
+}
+
+  FormulaPart = {
+    t: string  — The symbol or text, e.g. "KE", "=", "½", "v²"
+    name?: string  — Give a name to make the part explainable (hover/click)
+    note?: string  — What it means, units, why it is there
+  }
+  CalcVar = {
+    sym: string  — Key in v
+    label?: string  — Input label, e.g. "m (kg)"
+    value: number
+  }
+```
+**Variants shown in /kit:** plain (No calculator)
+```ts
+{ type: 'Formula', id: '…', props: {
+  title: "Kinetic energy",
+  parts: [
+    { t: "KE", name: "Kinetic energy", note: "In joules." },
+    { t: "=" },
+    { t: "½" },
+    { t: "m", name: "Mass", note: "kg" },
+    { t: "v²", name: "Speed squared", note: "Double the speed → 4× the energy." },
+  ],
+  calc: {
+    vars: [{ sym: "m", label: "m (kg)", value: 1200 }, { sym: "v", label: "v (m/s)", value: 14 }],
+    f: v=>.5*v.m*v.v**2,
+    label: "KE (J)",
+  },
+} }
+```
+
+### CompareTable
+Side-by-side comparison table with column highlight on hover and a built-in "Quiz me" mode that hides every cell until the learner recalls and taps it.
+**Use when:** Two to four things compared on the same features: mitosis vs meiosis, TCP vs UDP, arrays vs linked lists, Romans vs Greeks. 3–7 rows.
+```ts
+props: {
+  title?: string
+  columns: string[]  — Things being compared
+  rows: CompareRow[]
+  note?: string  — Caption under the table
+  initial?: "table" | "quiz" = "table"  — Start in Quiz me mode
+}
+
+  CompareRow = {
+    label: string  — Row heading
+    values: string[]  — One value per column
+  }
+```
+**Variants shown in /kit:** quiz (Three columns, initial: "quiz")
+```ts
+{ type: 'CompareTable', id: '…', props: {
+  title: "Mitosis vs meiosis",
+  columns: ["Mitosis", "Meiosis"],
+  rows: [
+    { label: "Purpose", values: ["Growth and repair", "Making gametes"] },
+    { label: "Daughter cells", values: ["2, identical", "4, all different"] },
+  ],
+} }
+```
+
+### PatternTable
+A table that shows a pattern with the changing part highlighted (stem + ending). Practice mode hides every cell for the learner to fill in from memory.
+**Use when:** Conjugation and declension tables, plural rules, number patterns, any grid where one part changes by rule.
+```ts
+props: {
+  title?: string
+  subtitle?: string  — The rule in one sentence
+  columns: string[]
+  rows: PatternRow[]
+  note?: string  — Tip shown in Study mode
+  initial?: "study" | "practice" = "study"
+}
+
+  PatternRow = {
+    label: string  — Row heading, e.g. "yo", "tú"
+    cells: string[]  — One per column, written "stem|ending" so the ending is highlighted, e.g. "habl|o"
+  }
+```
+**Saves:** In Practice mode, one attempt per check: items[{prompt: "<row> · <column>", answer, expected, correct}]. Accents must match.
+**Variants shown in /kit:** practice (initial: "practice")
+```ts
+{ type: 'PatternTable', id: '…', props: {
+  title: "hablar (to speak)",
+  subtitle: "Keep the stem habl-, add the ending.",
+  columns: ["Present"],
+  rows: [{ label: "yo", cells: ["habl|o"] }, { label: "tú", cells: ["habl|as"] }],
+} }
+```
+
+### Annotated
+A passage of code or prose with numbered highlights; each links to a note. Step through with ← → or hover a highlight.
+**Use when:** Walking through a code sample line by line, a poem, a historical source, a legal clause, a sentence’s grammar. 3–7 notes.
+```ts
+props: {
+  title?: string
+  text: string  — The passage. Newlines are kept
+  notes: Note[]
+  mono?: boolean = false  — Code: monospace on a dark panel
+}
+
+  Note = {
+    mark: string  — EXACT substring of text to highlight (first occurrence)
+    note: string  — What it means
+  }
+```
+**Notes:** A mark that does not appear in text (or overlaps an earlier mark) is skipped, so copy marks exactly.
+**Variants shown in /kit:** prose (Prose)
+```ts
+{ type: 'Annotated', id: '…', props: {
+  title: "A Go worker",
+  mono: true,
+  text: "for j := range jobs {\n    results <- j * 2\n}",
+  notes: [
+    { mark: "range jobs", note: "Loops until jobs is closed." },
+    { mark: "results <-", note: "Sends on the results channel." },
+  ],
+} }
+```
+
+### Timeline
+A horizontal timeline of events; select one (click, ← →) to read its details and how long after the previous event it happened.
+**Use when:** History, the development of a science, a biography, a product’s release history, geological eras. 4–10 events in order.
+```ts
+props: {
+  title?: string
+  events: TimelineEvent[]  — In chronological order
+}
+
+  TimelineEvent = {
+    date: string  — Shown as-is, e.g. "1914", "c. 500 BC", "June 1944". A 3–4 digit year in it enables "n years after …"
+    title: string
+    body?: string  — Details shown when selected
+  }
+```
+```ts
+{ type: 'Timeline', id: '…', props: {
+  title: "The Scientific Revolution",
+  events: [
+    { date: "1543", title: "Copernicus", body: "Proposes a Sun-centred model." },
+    { date: "1687", title: "Newton’s Principia", body: "Laws of motion and gravitation." },
+  ],
+} }
+```
+
+### Stepper
+Plays an algorithm frame by frame on an array (bars or boxes) with highlights, pointers, variables and a caption. Play/pause, step, scrub, speed.
+**Use when:** Sorting and searching algorithms, two-pointer techniques, stack/queue operations, any process on a list. Generate frames with a function that runs the algorithm and records each step.
+```ts
+props: {
+  title?: string
+  steps: StepFrame[] | () => StepFrame[]  — Frames, or a function that generates them (preferred for algorithms)
+  bars?: boolean = true  — Draw numeric cells as bars; false = equal boxes
+}
+
+  StepFrame = {
+    cells: (number | string)[]  — Array contents at this step (numbers draw as bars)
+    caption?: string  — What happens in this step
+    hl?: number[]  — Indexes being compared (teal)
+    swap?: number[]  — Indexes just swapped (orange)
+    done?: number[]  — Indexes in their final place (green)
+    ptr?: Record<string, string>  — Pointer labels under cells, e.g. { "0": "i", "3": "j" }
+    vars?: Record<string, string | number>  — Variables shown under the caption
+  }
+```
+**Notes:** Keys: ← → step, Space plays/pauses.
+**Variants shown in /kit:** boxes (Static frames, bars: false)
+```ts
+{ type: 'Stepper', id: '…', props: {
+  title: "Binary search for 7",
+  bars: false,
+  steps: [
+    {
+      cells: [1, 3, 5, 7, 9],
+      hl: [2],
+      ptr: { "0": "lo", "2": "mid", "4": "hi" },
+      caption: "5 < 7, so search the right half.",
+    },
+    { cells: [1, 3, 5, 7, 9], hl: [3], done: [3], ptr: { "3": "mid" }, caption: "Found 7 at index 3." },
+  ],
 } }
 ```
 

@@ -86,6 +86,7 @@
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Bricolage Grotesque", "DM Sans", ui-sans-serif, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-serif: "Newsreader", Georgia, serif;
 
   --color-page: var(--page);
   --color-surface: var(--surface);
