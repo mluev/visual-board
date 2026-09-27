@@ -1,0 +1,157 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ------------------------------------------------------------------
+   Learning Kit tokens ("soft blocks" direction, see design/Learning Kit.dc.html)
+   Every block card sets --tone-h / --tone-c; the tone-* colours follow it.
+   ------------------------------------------------------------------ */
+:root {
+  --page: #eceef1;
+  --surface: #ffffff;
+  --subtle: #f4f5f7;
+  --ink: #1b1d22;
+  --ink-2: #3e424b;
+  --ink-3: #5c606b;
+  --ink-4: #8a8f99;
+  --line: #e3e5e9;
+
+  --ok: oklch(0.48 0.13 155);
+  --ok-soft: oklch(0.95 0.04 155);
+  --bad: oklch(0.52 0.17 25);
+  --bad-soft: oklch(0.95 0.03 25);
+  --warn: oklch(0.5 0.11 85);
+  --warn-soft: oklch(0.95 0.04 85);
+
+  /* default tone: teal */
+  --tone-h: 195;
+  --tone-c: 0.12;
+
+  /* shadcn variables, mapped onto the kit palette */
+  --radius: 0.875rem;
+  --background: var(--surface);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: #ffffff;
+  --secondary: var(--subtle);
+  --secondary-foreground: var(--ink);
+  --muted: var(--subtle);
+  --muted-foreground: var(--ink-3);
+  --accent: var(--subtle);
+  --accent-foreground: var(--ink);
+  --destructive: var(--bad);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: oklch(0.55 var(--tone-c) var(--tone-h));
+}
+
+[data-tone] {
+  --tone: oklch(0.55 var(--tone-c) var(--tone-h));
+  --tone-strong: oklch(0.42 var(--tone-c) var(--tone-h));
+  --tone-ink: oklch(0.42 var(--tone-c) var(--tone-h));
+  --tone-mid: oklch(0.8 calc(var(--tone-c) * 0.55) var(--tone-h));
+  --tone-line: oklch(0.85 calc(var(--tone-c) * 0.4) var(--tone-h));
+  --tone-tint: oklch(0.95 calc(var(--tone-c) * 0.2) var(--tone-h));
+  --tone-soft: oklch(0.97 calc(var(--tone-c) * 0.13) var(--tone-h));
+}
+[data-tone="violet"] { --tone-h: 290; --tone-c: 0.16; }
+[data-tone="orange"] { --tone-h: 45; --tone-c: 0.16; }
+[data-tone="blue"] { --tone-h: 250; --tone-c: 0.16; }
+[data-tone="teal"] { --tone-h: 195; --tone-c: 0.12; --tone: oklch(0.52 0.12 195); }
+[data-tone="gold"] {
+  --tone-h: 85;
+  --tone-c: 0.11;
+  --tone: oklch(0.5 0.11 85);
+  --tone-strong: oklch(0.42 0.1 85);
+  --tone-ink: oklch(0.42 0.1 85);
+  --tone-line: oklch(0.88 0.05 85);
+  --tone-tint: oklch(0.95 0.04 85);
+  --tone-soft: oklch(0.97 0.02 85);
+}
+[data-tone="pink"] { --tone-h: 340; --tone-c: 0.16; }
+[data-tone="green"] { --tone-h: 155; --tone-c: 0.13; }
+[data-tone="red"] { --tone-h: 25; --tone-c: 0.17; }
+[data-tone="ink"] {
+  --tone-h: 260;
+  --tone-c: 0.01;
+  --tone: var(--ink);
+  --tone-strong: #000000;
+  --tone-ink: var(--ink);
+}
+
+@theme inline {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "DM Sans", ui-sans-serif, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-subtle: var(--subtle);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-line: var(--line);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  --color-tone: var(--tone);
+  --color-tone-strong: var(--tone-strong);
+  --color-tone-ink: var(--tone-ink);
+  --color-tone-mid: var(--tone-mid);
+  --color-tone-line: var(--tone-line);
+  --color-tone-tint: var(--tone-tint);
+  --color-tone-soft: var(--tone-soft);
+
+  --radius-card: 22px;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * { @apply border-border; }
+  html, body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    font-variant-ligatures: none;
+  }
+  button:not(:disabled) { cursor: pointer; }
+  a { color: oklch(0.45 0.14 250); }
+  a:hover { color: oklch(0.35 0.14 250); }
+}
+
+
+/* Shiki output inside CodeBlock */
+.kit-code pre { margin: 0; background: transparent !important; white-space: pre-wrap; word-break: break-word; font: inherit; }
+.kit-code code { font: inherit; }
