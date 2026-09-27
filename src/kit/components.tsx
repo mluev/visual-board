@@ -12,6 +12,13 @@ import { Cloze } from './blocks/Cloze/Cloze';
 import { ExplainBack } from './blocks/ExplainBack/ExplainBack';
 import { WorkedExample } from './blocks/WorkedExample/WorkedExample';
 import { CodeExercise } from './blocks/CodeExercise/CodeExercise';
+import { Matching } from './blocks/Matching/Matching';
+import { OrderSteps } from './blocks/OrderSteps/OrderSteps';
+import { SortBuckets } from './blocks/SortBuckets/SortBuckets';
+import { SpotMistake } from './blocks/SpotMistake/SpotMistake';
+import { Venn } from './blocks/Venn/Venn';
+import { LabelDiagram } from './blocks/LabelDiagram/LabelDiagram';
+import { ListenType } from './blocks/ListenType/ListenType';
 import { Callout } from './blocks/Callout/Callout';
 import { Stats } from './blocks/Stats/Stats';
 
@@ -27,6 +34,13 @@ export const components: { [K in BlockType]: ComponentType<BlockProps<K>> } = {
   ExplainBack,
   WorkedExample,
   CodeExercise,
+  Matching,
+  OrderSteps,
+  SortBuckets,
+  SpotMistake,
+  Venn,
+  LabelDiagram,
+  ListenType,
   Callout,
   Stats,
 };

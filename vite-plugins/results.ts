@@ -5,7 +5,8 @@
  *   GET  /api/results/:slug           → BoardResults | empty
  *   POST /api/results/:slug/:blockId  ← { type, title?, progress?, attempt? }
  *   GET  /api/reviews/:slug           → BoardReview | empty
- *   POST /api/uploads/:name           ← { dataUrl } → { url }   (image slots)
+ *   GET  /api/uploads/:name           → { url } | empty           (image slots)
+ *   POST /api/uploads/:name           ← { dataUrl } → { url }
  *
  * reviews/*.json is watched; changes are pushed to the page as the `kit:review` HMR event.
  */
@@ -146,13 +147,20 @@ export function resultsPlugin(): Plugin {
           if (kind === 'reviews' && req.method === 'GET' && slug) {
             return send(res, 200, readJson(path.join(dirs().reviews, `${slug}.json`)));
           }
+          if (kind === 'uploads' && req.method === 'GET' && slug) {
+            const dir = dirs().uploads;
+            const f = fs.existsSync(dir) ? fs.readdirSync(dir).find((x) => x.slice(0, x.lastIndexOf('.')) === slug) : undefined;
+            return send(res, 200, f ? { url: `/uploads/${f}?v=${fs.statSync(path.join(dir, f)).mtimeMs | 0}` } : undefined);
+          }
           if (kind === 'uploads' && req.method === 'POST' && slug) {
+            const dir = dirs().uploads;
+            if (fs.existsSync(dir)) for (const x of fs.readdirSync(dir)) if (x.slice(0, x.lastIndexOf('.')) === slug) fs.unlinkSync(path.join(dir, x));
             const { dataUrl } = (await body(req)) as { dataUrl: string };
             const ext = /^data:image\/(png|jpe?g|gif|webp|svg\+xml)/.exec(dataUrl)?.[1]?.replace('svg+xml', 'svg').replace('jpeg', 'jpg');
             if (!ext) return send(res, 400, { error: 'expected an image data URL' });
             const name = `${slug}.${ext}`;
             saveDataUrl(path.join(dirs().uploads, name), dataUrl);
-            return send(res, 200, { url: `/uploads/${name}` });
+            return send(res, 200, { url: `/uploads/${name}?v=${Date.now()}` });
           }
           return send(res, 404, { error: 'not found' });
         } catch (e) {

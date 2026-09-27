@@ -15,3 +15,10 @@ export function shuffle<T>(arr: readonly T[], seed = Math.random() * 2 ** 32): T
   }
   return a;
 }
+
+/** Seeded shuffle of 0..n-1 that is never the identity (for n > 1), so the answer isn't given away. */
+export function derange(n: number, seed: number): number[] {
+  const a = shuffle([...Array(n).keys()], seed);
+  if (n > 1 && a.every((v, i) => v === i)) a.push(a.shift()!);
+  return a;
+}

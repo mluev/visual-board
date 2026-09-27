@@ -14,6 +14,13 @@ import { cloze } from './blocks/Cloze/contract';
 import { explainBack } from './blocks/ExplainBack/contract';
 import { workedExample } from './blocks/WorkedExample/contract';
 import { codeExercise } from './blocks/CodeExercise/contract';
+import { matching } from './blocks/Matching/contract';
+import { orderSteps } from './blocks/OrderSteps/contract';
+import { sortBuckets } from './blocks/SortBuckets/contract';
+import { spotMistake } from './blocks/SpotMistake/contract';
+import { venn } from './blocks/Venn/contract';
+import { labelDiagram } from './blocks/LabelDiagram/contract';
+import { listenType } from './blocks/ListenType/contract';
 import { callout } from './blocks/Callout/contract';
 import { stats } from './blocks/Stats/contract';
 
@@ -29,6 +36,13 @@ export const contracts = {
   ExplainBack: explainBack,
   WorkedExample: workedExample,
   CodeExercise: codeExercise,
+  Matching: matching,
+  OrderSteps: orderSteps,
+  SortBuckets: sortBuckets,
+  SpotMistake: spotMistake,
+  Venn: venn,
+  LabelDiagram: labelDiagram,
+  ListenType: listenType,
   Callout: callout,
   Stats: stats,
 } as const;

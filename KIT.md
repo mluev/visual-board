@@ -60,7 +60,8 @@ Match the subject: code goes in `code` fields; languages, maths and everything e
 - **Core:** Explainer, Flashcards, Whiteboard
 - **Check:** Quiz, Test
 - **Charts:** BarChart
-- **Practice (learner produces an answer):** ShortAnswer, Cloze, ExplainBack, WorkedExample, CodeExercise
+- **Practice (learner produces an answer):** ShortAnswer, Cloze, ExplainBack, WorkedExample, CodeExercise, Matching, OrderSteps, SortBuckets, SpotMistake, LabelDiagram, ListenType
+- **Visual (explore an idea):** Venn
 - **Layout:** Callout, Stats
 
 ## Core
@@ -410,6 +411,220 @@ props: {
   tests: [{ call: "isPalindrome(\"racecar\")", expect: true }, { call: "isPalindrome(\"hello\")", expect: false }],
   hints: ["Lower-case it and drop anything that isn’t [a-z0-9]."],
   solution: "function isPalindrome(s) {\n  const t = s.toLowerCase().replace(/[^a-z0-9]/g, \"\");\n  return t === [...t].reverse().join(\"\");\n}",
+} }
+```
+
+### Matching
+Match each item on the left with its partner on the right (shuffled). Wrong picks flash red; matched pairs get their own colour.
+**Use when:** Terms ↔ definitions, words ↔ translations, functions ↔ outputs, causes ↔ effects. 4–7 pairs.
+```ts
+props: {
+  title?: string
+  pairs: Pair[]
+  mono?: boolean = false  — Monospace left column, for code
+  initial?: "open" | "done" = "open"  — Starting state (for previews)
+}
+
+  Pair = {
+    left: string  — Term (shown in order)
+    right: string  — Its match (shuffled)
+  }
+```
+**Saves:** When every pair is matched: an attempt with items[{prompt: left, expected: right, correct: matched on the first try, note: "n wrong tries"}]; score = pairs matched first time.
+**Variants shown in /kit:** done (mono, initial: "done")
+```ts
+{ type: 'Matching', id: '…', props: {
+  title: "Cell parts and their jobs",
+  pairs: [
+    { left: "mitochondria", right: "Makes ATP for the cell" },
+    { left: "ribosome", right: "Builds proteins" },
+    { left: "nucleus", right: "Stores the DNA" },
+  ],
+} }
+```
+
+### OrderSteps
+Put shuffled steps back in the right order by dragging or with ↑ ↓ buttons, then check. Wrong rows say where they belong.
+**Use when:** Processes, algorithms, historical sequences, proof steps, lifecycle stages. 4–8 steps.
+```ts
+props: {
+  title?: string
+  items: string[]  — Steps in the CORRECT order. They are shuffled for display
+  instruction?: string = "Put the steps in the right order, first at the top."
+  explain?: string  — Shown after checking
+  mono?: boolean = false
+  initial?: "open" | "submitted" = "open"  — Starting state (for previews)
+}
+```
+**Saves:** One attempt per check: items[{prompt: "Position n", answer: step placed there, expected: correct step, correct}].
+**Variants shown in /kit:** submitted (mono, initial: "submitted")
+```ts
+{ type: 'OrderSteps', id: '…', props: {
+  title: "How blood flows through the heart",
+  items: ["Right atrium", "Right ventricle", "Lungs", "Left atrium", "Left ventricle"],
+  explain: "Right side → lungs, left side → body.",
+} }
+```
+
+### SortBuckets
+Sort items into groups: drag a chip into a bucket, or click a chip then a bucket. Wrongly placed items explain why.
+**Use when:** Classification: parts of speech, types of rock, O(n) vs O(n²) snippets, mammals vs reptiles. 2–4 groups, 6–12 items.
+```ts
+props: {
+  title?: string
+  categories: string[]
+  items: SortItem[]
+  mono?: boolean = false
+  initial?: "open" | "submitted" = "open"  — Starting state (for previews)
+}
+
+  SortItem = {
+    text: string
+    cat: number  — Index into categories
+    why?: string  — Shown if the learner puts it in the wrong group
+  }
+```
+**Saves:** One attempt per check: items[{prompt: item text, answer: chosen group, expected: correct group, correct}].
+**Variants shown in /kit:** submitted (mono, initial: "submitted")
+```ts
+{ type: 'SortBuckets', id: '…', props: {
+  title: "Parts of speech",
+  categories: ["Noun", "Verb", "Adjective"],
+  items: [
+    { text: "happiness", cat: 0, why: "-ness makes a noun." },
+    { text: "run", cat: 1 },
+    { text: "bright", cat: 2 },
+  ],
+} }
+```
+
+### SpotMistake
+Lines of code or prose; the learner clicks every line that has a mistake, then sees found/missed lines with the fix and why.
+**Use when:** Debugging practice, grammar errors in a paragraph, wrong steps in a calculation. 1–3 mistakes in 5–12 lines.
+```ts
+props: {
+  title?: string = "Find the mistakes"
+  lines: (string | Line)[]  — Plain strings are correct lines; objects with `fix` are the mistakes
+  instruction?: string  — Default: "Click every line that has a mistake. There are N."
+  mono?: boolean = true  — Monospace (code). Set false for prose
+  initial?: "open" | "submitted" = "open"  — Starting state (for previews)
+}
+
+  Line = {
+    text: string
+    fix?: string  — Set on WRONG lines only: the corrected line
+    why?: string  — Why it was wrong
+  }
+```
+**Saves:** One attempt per check: an item per wrong line {prompt: line, answer: "flagged" | "missed", expected: fix, correct: flagged}, plus an item per correct line flagged by mistake {answer: "flagged", expected: "(line is fine)", correct: false}.
+**Variants shown in /kit:** prose (mono: false, initial: "submitted")
+```ts
+{ type: 'SpotMistake', id: '…', props: {
+  title: "Find the bugs",
+  lines: [
+    "func sum(nums []int) int {",
+    "    total := 0",
+    {
+      text: "    for i := 0; i <= len(nums); i++ {",
+      fix: "for i := 0; i < len(nums); i++ {",
+      why: "<= reads one past the end.",
+    },
+    "        total += nums[i]",
+    "    }",
+    "    return total",
+    "}",
+  ],
+} }
+```
+
+### LabelDiagram
+Numbered pins on an image; the learner picks the right label for each pin from a bank (with optional distractors), then checks.
+**Use when:** Anatomy, maps, parts of a machine, a circuit, a plant cell, UI parts of a screenshot. 4–8 pins.
+```ts
+props: {
+  title?: string
+  image?: string  — Image URL or /path in public/
+  slotId?: string  — Unique id for a drop-your-own-image slot (when no image)
+  placeholder?: string  — Text in the empty slot
+  pins: Pin[]
+  distractors?: string[] = []  — Extra wrong labels in the bank
+  aspect?: string = "4 / 3"  — Image box aspect ratio, e.g. "16 / 9"
+  initial?: "open" | "submitted" = "open"  — Starting state (for previews)
+}
+
+  Pin = {
+    x: number  — % from the left of the image
+    y: number  — % from the top of the image
+    label: string  — Correct label for this pin
+  }
+```
+**Saves:** One attempt per check: items[{prompt: "Pin n", answer: chosen label, expected: label, correct}].
+**Notes:** Give `image` (a URL, or a file in public/, e.g. "/kit/plant-cell.svg") OR a `slotId`: then the learner drops their own image, saved to public/uploads/<slotId>.* and reused. Place pins by % after you know the image.
+**Variants shown in /kit:** slot (slotId (drop your own image), initial: "submitted")
+```ts
+{ type: 'LabelDiagram', id: '…', props: {
+  title: "Parts of a plant cell",
+  image: "/kit/plant-cell.svg",
+  pins: [{ x: 48, y: 46, label: "Nucleus" }, { x: 72, y: 28, label: "Chloroplast" }],
+  distractors: ["Centriole"],
+} }
+```
+
+### ListenType
+Dictation and speaking practice with the browser’s speech voices. "Listen & type": hear a phrase (normal or slow) and type it. "Say it": read it aloud and the browser checks what it heard (where speech recognition exists).
+**Use when:** Language learning: listening comprehension, spelling, pronunciation. 3–8 short phrases.
+```ts
+props: {
+  title?: string
+  items: Phrase[]
+  lang?: string = "en-GB"  — Default BCP-47 language for items
+}
+
+  Phrase = {
+    text: string  — What is spoken
+    lang?: string  — BCP-47 code, e.g. "fr-FR", "es-ES", "en-GB". Defaults to the block lang
+    translation?: string  — Meaning or note shown after answering
+  }
+```
+**Saves:** When the set is finished: an attempt with items[{prompt: phrase, answer: typed or heard text, expected: phrase, correct}], meta.mode ("listen" | "speak").
+**Notes:** Enter checks, then Enter again goes to the next phrase. Speech quality depends on the voices installed in the browser.
+**Variants shown in /kit:** french (lang: "fr-FR")
+```ts
+{ type: 'ListenType', id: '…', props: {
+  title: "Everyday French",
+  lang: "fr-FR",
+  items: [
+    { text: "Où est la gare ?", translation: "Where is the station?" },
+    { text: "Je voudrais un café, s’il vous plaît." },
+  ],
+} }
+```
+
+## Visual (explore an idea)
+
+### Venn
+A 2- or 3-set Venn diagram with items placed in their regions. "Sort it yourself" mode: the learner clicks where each item belongs, then checks.
+**Use when:** Comparing overlapping categories: animal traits, language features, set theory, "which of these is both…". 5–10 items.
+```ts
+props: {
+  title?: string
+  sets: string[]  — 2 or 3 set names
+  items: VennItem[]
+  initial?: "view" | "practice" = "view"  — Starting mode
+}
+
+  VennItem = {
+    text: string
+    in: number[]  — Indexes of the sets it belongs to; [] = outside all
+  }
+```
+**Saves:** In "Sort it yourself" mode, one attempt per check: items[{prompt: item, answer: sets it was placed in (or "none"), expected, correct}].
+**Variants shown in /kit:** practice (Two sets, initial: "practice")
+```ts
+{ type: 'Venn', id: '…', props: {
+  title: "Animal traits",
+  sets: ["Mammals", "Can fly"],
+  items: [{ text: "Dog", in: [0] }, { text: "Bat", in: [0, 1] }, { text: "Eagle", in: [1] }],
 } }
 ```
 

@@ -106,4 +106,87 @@ describe('practice blocks write results', () => {
     expect(a.items[1]).toMatchObject({ prompt: 'Key point: Axis tilt', answer: 'ticked' });
     expect(a.items[2]).toMatchObject({ prompt: 'Key point: Not distance', answer: 'not ticked' });
   });
+
+  it('Matching: records first-try correctness per pair', async () => {
+    const user = userEvent.setup();
+    render(board({ type: 'Matching', id: 'm', props: { pairs: [{ left: 'dog', right: 'chien' }, { left: 'cat', right: 'chat' }] } }));
+    await user.click(await screen.findByText('dog'));
+    await user.click(screen.getByText('chat'));
+    await user.click(screen.getByText('chien'));
+    await user.click(screen.getByText('cat'));
+    await act(() => user.click(screen.getByText('chat')));
+    const a = await attempt();
+    expect(a.score).toBe(1);
+    expect(a.items[0]).toMatchObject({ prompt: 'dog', correct: false, note: '1 wrong try' });
+    expect(a.items[1]).toMatchObject({ prompt: 'cat', correct: true });
+  });
+
+  it('OrderSteps: arrows reorder, check records positions', async () => {
+    const user = userEvent.setup();
+    render(board({ type: 'OrderSteps', id: 'o', props: { items: ['a', 'b', 'c'] } }));
+    const texts = () => [...document.querySelectorAll('ol li')].map((li) => li.textContent!.replace(/[↑↓\d]/g, ''));
+    await screen.findByText('Check order');
+    // sort to a, b, c using the arrows
+    for (let guard = 0; guard < 10 && texts().join() !== 'a,b,c'; guard++) {
+      const t = texts();
+      const i = t.findIndex((x, k) => k > 0 && x < t[k - 1]);
+      await user.click(screen.getAllByLabelText('Move up')[i]);
+    }
+    expect(texts()).toEqual(['a', 'b', 'c']);
+    await act(() => user.click(screen.getByText('Check order')));
+    const a = await attempt();
+    expect(a.score).toBe(3);
+    expect(a.items[0]).toMatchObject({ prompt: 'Position 1', answer: 'a', expected: 'a', correct: true });
+  });
+
+  it('SortBuckets: click item then bucket', async () => {
+    const user = userEvent.setup();
+    render(board({ type: 'SortBuckets', id: 's', props: { categories: ['Fruit', 'Veg'], items: [{ text: 'apple', cat: 0 }, { text: 'leek', cat: 1 }] } }));
+    await user.click(await screen.findByText('apple'));
+    await user.click(screen.getByText('Veg'));
+    await user.click(screen.getByText('leek'));
+    await user.click(screen.getByText('Veg'));
+    await act(() => user.click(screen.getByText('Check')));
+    const a = await attempt();
+    expect(a.items).toEqual([expect.objectContaining({ prompt: 'apple', answer: 'Veg', expected: 'Fruit', correct: false }), expect.objectContaining({ prompt: 'leek', correct: true })]);
+  });
+
+  it('SpotMistake: found, missed and false positives', async () => {
+    const user = userEvent.setup();
+    render(board({ type: 'SpotMistake', id: 'sm', props: { mono: false, lines: ['ok one', { text: 'bad one', fix: 'good one' }, { text: 'bad two', fix: 'good two' }] } }));
+    await user.click(await screen.findByText('bad one'));
+    await user.click(screen.getByText('ok one'));
+    await act(() => user.click(screen.getByText('Check')));
+    const a = await attempt();
+    expect(a.score).toBe(1);
+    expect(a.items).toEqual([
+      expect.objectContaining({ prompt: 'bad one', answer: 'flagged', correct: true }),
+      expect.objectContaining({ prompt: 'bad two', answer: 'missed', correct: false }),
+      expect.objectContaining({ prompt: 'ok one', expected: '(line is fine)', correct: false }),
+    ]);
+  });
+
+  it('LabelDiagram: bank labels fill pins in turn', async () => {
+    const user = userEvent.setup();
+    render(board({ type: 'LabelDiagram', id: 'l', props: { image: '/x.png', pins: [{ x: 10, y: 10, label: 'Head' }, { x: 50, y: 90, label: 'Foot' }], distractors: ['Hand'] } }));
+    await user.click(await screen.findByRole('button', { name: 'Head' }));
+    await user.click(screen.getByRole('button', { name: 'Hand' }));
+    await act(() => user.click(screen.getByText('Check labels')));
+    const a = await attempt();
+    expect(a.items).toEqual([expect.objectContaining({ prompt: 'Pin 1', answer: 'Head', correct: true }), expect.objectContaining({ prompt: 'Pin 2', answer: 'Hand', expected: 'Foot', correct: false })]);
+  });
+
+  it('ListenType: typed dictation is judged and saved at the end', async () => {
+    const user = userEvent.setup();
+    render(board({ type: 'ListenType', id: 'lt', props: { items: [{ text: 'Bonjour à tous.' }, { text: 'Merci.' }] } }));
+    await user.type(await screen.findByLabelText('What you hear'), 'bonjour a tous{Enter}');
+    await user.click(screen.getByText('Next'));
+    await user.type(screen.getByLabelText('What you hear'), 'mercy{Enter}');
+    await act(() => user.click(screen.getByText('See results')));
+    const a = await attempt();
+    expect(a.meta.mode).toBe('listen');
+    expect(a.items[0]).toMatchObject({ expected: 'Bonjour à tous.', correct: true, note: 'almost (spelling slip)' });
+    expect(a.items[1]).toMatchObject({ answer: 'mercy', correct: true });
+  });
 });
+
