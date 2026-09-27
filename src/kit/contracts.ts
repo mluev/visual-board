@@ -29,6 +29,10 @@ import { patternTable } from './blocks/PatternTable/contract';
 import { annotated } from './blocks/Annotated/contract';
 import { timeline } from './blocks/Timeline/contract';
 import { stepper } from './blocks/Stepper/contract';
+import { conceptMap } from './blocks/ConceptMap/contract';
+import { flowDiagram } from './blocks/FlowDiagram/contract';
+import { tree } from './blocks/Tree/contract';
+import { hotspots } from './blocks/Hotspots/contract';
 import { callout } from './blocks/Callout/contract';
 import { stats } from './blocks/Stats/contract';
 
@@ -59,6 +63,10 @@ export const contracts = {
   Annotated: annotated,
   Timeline: timeline,
   Stepper: stepper,
+  ConceptMap: conceptMap,
+  FlowDiagram: flowDiagram,
+  Tree: tree,
+  Hotspots: hotspots,
   Callout: callout,
   Stats: stats,
 } as const;

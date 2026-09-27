@@ -61,7 +61,7 @@ Match the subject: code goes in `code` fields; languages, maths and everything e
 - **Check:** Quiz, Test
 - **Charts:** BarChart, LineChart
 - **Practice (learner produces an answer):** ShortAnswer, Cloze, ExplainBack, WorkedExample, CodeExercise, Matching, OrderSteps, SortBuckets, SpotMistake, LabelDiagram, ListenType
-- **Visual (explore an idea):** Venn, FunctionPlot, Formula, CompareTable, PatternTable, Annotated, Timeline, Stepper
+- **Visual (explore an idea):** Venn, FunctionPlot, Formula, CompareTable, PatternTable, Annotated, Timeline, Stepper, ConceptMap, FlowDiagram, Tree, Hotspots
 - **Layout:** Callout, Stats
 
 ## Core
@@ -890,6 +890,131 @@ props: {
       caption: "5 < 7, so search the right half.",
     },
     { cells: [1, 3, 5, 7, 9], hl: [3], done: [3], ptr: { "3": "mid" }, caption: "Found 7 at index 3." },
+  ],
+} }
+```
+
+### ConceptMap
+Concepts as nodes joined by labelled links. Click a node to highlight its neighbours and read its note and relationships; drag nodes to rearrange.
+**Use when:** How ideas relate: ecosystems, causes of a war, parts of an architecture, grammar concepts. 5–10 nodes. Lay them out top-to-bottom from general to specific.
+```ts
+props: {
+  title?: string
+  nodes: MapNode[]
+  links?: MapLink[] = []
+  height?: number = 420  — Map height in px
+}
+
+  MapNode = {
+    id: string
+    label: string
+    x: number  — % from the left
+    y: number  — % from the top
+    note?: string  — Shown when selected
+  }
+  MapLink = {
+    from: string  — Node id
+    to: string  — Node id
+    label?: string  — Relationship, e.g. "eaten by"
+  }
+```
+**Notes:** Cards can be as narrow as ~460px: keep nodes on the same row at least ~25% apart in x and rows ~25% apart in y, at most 3–4 nodes per row, and short labels, so link labels stay visible.
+```ts
+{ type: 'ConceptMap', id: '…', props: {
+  title: "How an ecosystem fits together",
+  nodes: [
+    { id: "sun", label: "Sunlight", x: 20, y: 20 },
+    { id: "plant", label: "Producers", x: 50, y: 50, note: "Make food from light." },
+    { id: "herb", label: "Herbivores", x: 80, y: 80 },
+  ],
+  links: [{ from: "sun", to: "plant", label: "powers" }, { from: "plant", to: "herb", label: "eaten by" }],
+} }
+```
+
+### FlowDiagram
+A decision flowchart the learner walks through: answer each question to reveal the path, ending at a result. Optional example cases to reason about; "Start over" cycles to the next case.
+**Use when:** Rules with branches: which tense to use, which algorithm to pick, a diagnosis checklist, a legal test, debugging steps. 3–8 nodes.
+```ts
+props: {
+  title?: string
+  nodes: FlowNode[]
+  cases?: string[] = []  — Example situations to test the flow on
+}
+
+  FlowNode = {
+    id: string
+    type: "start" | "step" | "decision" | "end"
+    text: string
+    note?: string  — Hint on a question, or an example on a result
+    next?: string  — start/step: id of the next node
+    yes?: string  — decision: id when the answer is yes
+    no?: string  — decision: id when the answer is no
+    yesLabel?: string  — Button text instead of "Yes"
+    noLabel?: string  — Button text instead of "No"
+  }
+```
+**Notes:** The first node is where the walk starts. Every next/yes/no must be a node id.
+```ts
+{ type: 'FlowDiagram', id: '…', props: {
+  title: "Past simple or present perfect?",
+  cases: ["\"She ___ (visit) Rome in 2019.\""],
+  nodes: [
+    { id: "q1", type: "decision", text: "Do you say WHEN it happened?", yes: "ps", no: "pp" },
+    { id: "ps", type: "end", text: "Past simple", note: "\"She visited Rome in 2019.\"" },
+    { id: "pp", type: "end", text: "Present perfect", note: "\"I have lost my keys.\"" },
+  ],
+} }
+```
+
+### Tree
+A collapsible hierarchy with a details panel: click a branch to open it and read its note and breadcrumb path.
+**Use when:** Taxonomies and hierarchies: tree of life, file systems, org charts, class inheritance, topic outlines, family trees.
+```ts
+props: {
+  title?: string
+  root: TreeNode  — TreeNode = { label: string; note?: string; children?: TreeNode[] }
+  open?: string[] = ["0"]  — Paths open at start: "0" = root, "0.2" = its third child
+}
+```
+```ts
+{ type: 'Tree', id: '…', props: {
+  title: "The tree of life",
+  root: {
+    label: "Life",
+    note: "All living things.",
+    children: [{ label: "Bacteria" }, { label: "Eukarya", children: [{ label: "Animals" }, { label: "Plants" }] }],
+  },
+} }
+```
+
+### Hotspots
+Numbered points on an image; tap one (or use the arrows for a guided tour) to read about that part. Tracks how many have been explored.
+**Use when:** Exploring a picture: layers of the Earth, a painting, a machine, a map, anatomy, a UI. 3–8 spots. Use LabelDiagram instead when the learner should name the parts.
+```ts
+props: {
+  title?: string
+  image?: string
+  slotId?: string
+  placeholder?: string
+  spots: Spot[]
+  aspect?: string = "16 / 9"
+}
+
+  Spot = {
+    x: number  — % from the left
+    y: number  — % from the top
+    title: string
+    body: string  — Explanation shown when selected
+  }
+```
+**Notes:** Give `image` (a URL or a file in public/, e.g. "/kit/earth-layers.svg") or a `slotId` for a drop-your-own-image slot.
+```ts
+{ type: 'Hotspots', id: '…', props: {
+  title: "Layers of the Earth",
+  image: "/kit/earth-layers.svg",
+  spots: [
+    { x: 35.7, y: 14.2, title: "Crust", body: "The thin rocky outer layer." },
+    { x: 66.2, y: 86.7, title: "Inner core", body: "Solid iron at ~5,400 °C." },
   ],
 } }
 ```

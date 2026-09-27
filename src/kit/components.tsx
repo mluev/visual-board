@@ -27,6 +27,10 @@ import { PatternTable } from './blocks/PatternTable/PatternTable';
 import { Annotated } from './blocks/Annotated/Annotated';
 import { Timeline } from './blocks/Timeline/Timeline';
 import { Stepper } from './blocks/Stepper/Stepper';
+import { ConceptMap } from './blocks/ConceptMap/ConceptMap';
+import { FlowDiagram } from './blocks/FlowDiagram/FlowDiagram';
+import { Tree } from './blocks/Tree/Tree';
+import { Hotspots } from './blocks/Hotspots/Hotspots';
 import { Callout } from './blocks/Callout/Callout';
 import { Stats } from './blocks/Stats/Stats';
 
@@ -57,6 +61,10 @@ export const components: { [K in BlockType]: ComponentType<BlockProps<K>> } = {
   Annotated,
   Timeline,
   Stepper,
+  ConceptMap,
+  FlowDiagram,
+  Tree,
+  Hotspots,
   Callout,
   Stats,
 };
