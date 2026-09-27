@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Tree</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button onClick="{{ expandAll }}" style="border:none;border-radius:999px;background:#F4F5F7;padding:8px 12px;font-size:14px;font-weight:700;color:#1B1D22">Expand all</button>
+      <button onClick="{{ collapseAll }}" style="border:none;border-radius:999px;background:#F4F5F7;padding:8px 12px;font-size:14px;font-weight:700;color:#1B1D22">Collapse</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px;align-items:start">
+    <div style="display:flex;flex-direction:column;background:oklch(0.97 0.015 195);border-radius:16px;padding:10px">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+        <div style="display:flex;align-items:stretch;padding-left:{{ r.indent }}">
+          <sc-for list="{{ r.guides }}" as="g"><span style="width:20px;flex-shrink:0;display:flex;justify-content:center"><span style="width:2px;background:oklch(0.87 0.04 195)"></span></span></sc-for>
+          <button onClick="{{ r.onClick }}" style="flex:1;display:flex;align-items:center;gap:8px;text-align:left;border:none;border-radius:10px;padding:7px 10px;font-size:15px;color:#1B1D22;transition:background .15s;background:{{ r.bg }};font-weight:{{ r.weight }}">
+            <span style="width:18px;flex-shrink:0;font-size:12px;color:oklch(0.4 0.1 195);transition:transform .15s;transform:{{ r.rot }}">{{ r.caret }}</span>
+            <span style="flex:1">{{ r.label }}</span>
+            <sc-if value="{{ r.hasCount }}"><span style="font-size:12px;font-weight:700;color:#5C606B;background:#FFFFFF;border-radius:999px;padding:2px 8px">{{ r.count }}</span></sc-if>
+          </button>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;background:#F4F5F7;border-radius:16px;padding:16px">
+      <span style="font-size:13px;font-weight:700;color:#5C606B">{{ crumbs }}</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.01em">{{ selLabel }}</span>
+      <span style="font-size:15px;line-height:1.5;color:#3E424B;text-wrap:pretty">{{ selNote }}</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:520},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;The tree of life&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;root&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{label:string, note?:string, children?:Node[]}&quot;}}">
+const DEMO = { label: 'Life', note: 'Every living thing, sorted by shared ancestry.', children: [
+  { label: 'Bacteria', note: 'Single cells with no nucleus. They are everywhere, including your gut.', children: [{ label: 'E. coli' }, { label: 'Streptococcus' }] },
+  { label: 'Archaea', note: 'No nucleus either, but chemically closer to us than to bacteria. Many live in extreme places.' },
+  { label: 'Eukarya', note: 'Cells with a nucleus.', children: [
+    { label: 'Animals', note: 'Multicellular organisms that eat other organisms and can usually move.', children: [{ label: 'Mammals', note: 'Hair, and milk for their young.' }, { label: 'Birds' }, { label: 'Insects' }] },
+    { label: 'Plants', note: 'Make their own food by photosynthesis. Cell walls are made of cellulose.', children: [{ label: 'Flowering plants' }, { label: 'Ferns' }] },
+    { label: 'Fungi', note: 'Absorb food from their surroundings. Cell walls are made of chitin. More closely related to animals than to plants.' }
+  ] }
+] };
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } } return v; };
+const count = n => (n.children || []).reduce((a, c) => a + 1 + count(c), 0);
+
+class Component extends DCLogic {
+  root() { return (this.props.root && parse(this.props.root)) || DEMO; }
+  all() { const out = []; const walk = (n, p) => { out.push(p); (n.children || []).forEach((c, i) => walk(c, p + '.' + i)); }; walk(this.root(), '0'); return out; }
+  state = { open: ['0', '0.2'], sel: '0' };
+  renderVals() {
+    const R = this.root(), { open, sel } = this.state, rows = [], byPath = {};
+    const walk = (n, path, depth, trail) => {
+      byPath[path] = { n, trail };
+      const kids = n.children || [], isOpen = open.includes(path);
+      rows.push({ n, path, depth, kids: kids.length, isOpen });
+      if (isOpen) kids.forEach((c, i) => walk(c, path + '.' + i, depth + 1, [...trail, n.label]));
+    };
+    walk(R, '0', 0, []);
+    const S = byPath[sel] || byPath['0'];
+    return {
+      title: this.props.title ?? 'The tree of life',
+      expandAll: () => this.setState({ open: this.all() }), collapseAll: () => this.setState({ open: [], sel: '0' }),
+      rows: rows.map(r => ({
+        label: r.n.label, indent: '0px', guides: [...Array(r.depth).keys()],
+        caret: r.kids ? '▶' : '•', rot: r.kids && r.isOpen ? 'rotate(90deg)' : 'none',
+        hasCount: r.kids > 0 && !r.isOpen, count: count(r.n),
+        bg: sel === r.path ? '#FFFFFF' : 'transparent', weight: sel === r.path ? 700 : r.depth === 0 ? 700 : 500,
+        onClick: () => this.setState(s => ({ sel: r.path, open: r.kids ? (s.open.includes(r.path) && s.sel === r.path ? s.open.filter(x => x !== r.path) : [...new Set([...s.open, r.path])]) : s.open }))
+      })),
+      crumbs: S.trail.length ? S.trail.join(' › ') : 'Top level',
+      selLabel: S.n.label,
+      selNote: S.n.note || (S.n.children ? `${S.n.children.length} branches: ${S.n.children.map(c => c.label).join(', ')}.` : 'No further branches here.')
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}input[type=range]{width:100%}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:18px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Chart</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:21px;font-weight:700;letter-spacing:-.01em;text-wrap:balance">{{ title }}</span>
+    </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <sc-for list="{{ legend }}" as="l" hint-placeholder-count="2">
+        <span style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:#3E424B"><span style="width:14px;height:4px;border-radius:2px;background:{{ l.color }}"></span>{{ l.name }}</span>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:52px minmax(0,1fr);grid-template-rows:240px 24px;column-gap:8px;background:oklch(0.97 0.015 195);border-radius:16px;padding:16px 20px 8px 8px">
+    <div style="position:relative">
+      <sc-for list="{{ yTicks }}" as="t" hint-placeholder-count="4">
+        <span style="position:absolute;right:0;transform:translateY(-50%);font-size:12px;font-weight:500;color:#5C606B;font-variant-numeric:tabular-nums;top:{{ t.top }}">{{ t.label }}</span>
+      </sc-for>
+    </div>
+    <div onMouseMove="{{ onMove }}" onMouseLeave="{{ onLeave }}" style="position:relative;cursor:crosshair">
+      <sc-for list="{{ yTicks }}" as="t" hint-placeholder-count="4"><div style="position:absolute;left:0;right:0;height:1px;background:oklch(0.9 0.03 195);top:{{ t.top }}"></div></sc-for>
+      <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
+        <sc-for list="{{ lines }}" as="ln" hint-placeholder-count="2">
+          <polyline points="{{ ln.points }}" fill="none" stroke="{{ ln.color }}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>
+        </sc-for>
+      </svg>
+      <sc-if value="{{ hovering }}">
+        <div style="position:absolute;top:0;bottom:0;width:1px;background:#1B1D22;opacity:.35;left:{{ hx }}"></div>
+        <sc-for list="{{ dots }}" as="d"><div style="position:absolute;width:12px;height:12px;border-radius:50%;border:3px solid #FFFFFF;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,.2);left:{{ d.left }};top:{{ d.top }};background:{{ d.color }}"></div></sc-for>
+        <div style="position:absolute;top:8px;background:#1B1D22;color:#FFFFFF;border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;font-size:13px;white-space:nowrap;pointer-events:none;left:{{ tipLeft }};transform:{{ tipShift }}">
+          <span style="font-weight:700">{{ tipTitle }}</span>
+          <sc-for list="{{ dots }}" as="d"><span>{{ d.name }}: {{ d.value }}</span></sc-for>
+        </div>
+      </sc-if>
+    </div>
+    <div style="font-size:12px;font-weight:500;color:#5C606B;align-self:end;text-align:right">{{ xLabel }}</div>
+    <div style="position:relative">
+      <sc-for list="{{ xTicks }}" as="t" hint-placeholder-count="5">
+        <span style="position:absolute;top:6px;transform:translateX(-50%);font-size:12px;font-weight:500;color:#5C606B;font-variant-numeric:tabular-nums;left:{{ t.left }}">{{ t.label }}</span>
+      </sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ hasParam }}">
+    <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center">
+      <span style="font-size:15px;font-weight:700;color:oklch(0.4 0.1 195);font-variant-numeric:tabular-nums;min-width:110px">{{ paramLabel }}</span>
+      <input type="range" min="{{ pMin }}" max="{{ pMax }}" step="{{ pStep }}" value="{{ pVal }}" onChange="{{ setP }}" style="accent-color:oklch(0.52 0.12 195)">
+    </div>
+  </sc-if>
+  <sc-if value="{{ hasNote }}"><div style="font-size:16px;line-height:1.5;color:#3E424B;text-wrap:pretty">{{ note }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:520},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Simple vs compound interest on $1,000&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;series&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{name:string, color?:string, points:[number,number][]}[] | ((p:number)=&gt;…)&quot;},&quot;param&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{name:string, min:number, max:number, step?:number, value:number, unit?:string}&quot;},&quot;note&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string | ((p:number, series)=&gt;string)&quot;},&quot;xLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;yMin&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number&quot;}}">
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } } return v; };
+const COLORS = ['oklch(0.52 0.12 195)', 'oklch(0.55 0.16 290)', 'oklch(0.58 0.16 45)', 'oklch(0.55 0.16 250)'];
+const DEMO_PARAM = { name: 'rate', min: 1, max: 12, step: 0.5, value: 7, unit: '%' };
+const DEMO = r => {
+  const yrs = [...Array(31).keys()];
+  return [
+    { name: 'Compound', points: yrs.map(y => [y, 1000 * Math.pow(1 + r / 100, y)]) },
+    { name: 'Simple', points: yrs.map(y => [y, 1000 * (1 + (r / 100) * y)]) }
+  ];
+};
+const DEMO_NOTE = (r, s) => { const c = s[0].points[30][1], p = s[1].points[30][1]; return `After 30 years at ${r}%, $1,000 grows to $${Math.round(c).toLocaleString()} compounded vs $${Math.round(p).toLocaleString()} simple — ${(c / p).toFixed(1)}× more.`; };
+const nice = (min, max, n = 4) => {
+  const span = max - min || 1, s0 = span / n, mag = Math.pow(10, Math.floor(Math.log10(s0))), f = s0 / mag;
+  const step = (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * mag;
+  const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step, t = [];
+  for (let v = lo; v <= hi + step / 2; v += step) t.push(+v.toFixed(8));
+  return { lo, hi, t };
+};
+const fmt = v => Math.abs(v) >= 1000 ? (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : (v / 1000).toFixed(Math.abs(v) >= 1e4 ? 0 : 1) + 'k') : Math.abs(v) < 10 && v % 1 ? v.toFixed(2) : Math.round(v).toString();
+
+class Component extends DCLogic {
+  state = { p: null, hi: -1 };
+  demo() { return this.props.series == null; }
+  renderVals() {
+    const demo = this.demo(), param = demo ? DEMO_PARAM : parse(this.props.param);
+    const pv = this.state.p ?? param?.value;
+    const raw = demo ? DEMO : this.props.series;
+    const series = (typeof raw === 'function' ? raw(pv) : parse(raw)) || [];
+    const all = series.flatMap(s => s.points);
+    const xs = all.map(p => p[0]), ys = all.map(p => p[1]);
+    const xMin = Math.min(...xs), xMax = Math.max(...xs);
+    const Y = nice(this.props.yMin ?? Math.min(0, ...ys), Math.max(...ys));
+    const X = nice(xMin, xMax, 5);
+    const px = x => ((x - xMin) / (xMax - xMin || 1)), py = y => 1 - (y - Y.lo) / (Y.hi - Y.lo || 1);
+    const hi = this.state.hi, base = series[0]?.points || [];
+    const hp = base[hi];
+    const noteSrc = demo ? DEMO_NOTE : this.props.note;
+    const note = typeof noteSrc === 'function' ? noteSrc(pv, series) : (noteSrc || '');
+    const hxF = hp ? px(hp[0]) : 0;
+    return {
+      title: this.props.title ?? 'Simple vs compound interest on $1,000',
+      xLabel: this.props.xLabel ?? (demo ? 'years' : ''),
+      legend: series.map((s, i) => ({ name: s.name, color: s.color || COLORS[i % 4] })),
+      lines: series.map((s, i) => ({ color: s.color || COLORS[i % 4], points: s.points.map(p => `${(px(p[0]) * 1000).toFixed(1)},${(py(p[1]) * 1000).toFixed(1)}`).join(' ') })),
+      yTicks: Y.t.map(v => ({ label: fmt(v), top: py(v) * 100 + '%' })),
+      xTicks: X.t.filter(v => v >= xMin && v <= xMax).map(v => ({ label: fmt(v), left: px(v) * 100 + '%' })),
+      onMove: e => {
+        const r = e.currentTarget.getBoundingClientRect(), f = (e.clientX - r.left) / r.width, x = xMin + f * (xMax - xMin);
+        let best = 0; base.forEach((p, i) => { if (Math.abs(p[0] - x) < Math.abs(base[best][0] - x)) best = i; });
+        if (best !== this.state.hi) this.setState({ hi: best });
+      },
+      onLeave: () => this.setState({ hi: -1 }),
+      hovering: !!hp, hx: hxF * 100 + '%',
+      tipLeft: hxF * 100 + '%', tipShift: hxF > 0.6 ? 'translateX(calc(-100% - 12px))' : 'translateX(12px)',
+      tipTitle: hp ? `${this.props.xLabel ?? (demo ? 'year' : 'x')} ${fmt(hp[0])}` : '',
+      dots: hp ? series.map((s, i) => { const p = s.points[hi]; return p ? { name: s.name, value: fmt(p[1]), color: s.color || COLORS[i % 4], left: px(p[0]) * 100 + '%', top: py(p[1]) * 100 + '%' } : null; }).filter(Boolean) : [],
+      hasParam: !!param, paramLabel: param ? `${param.name ?? 'x'} = ${pv}${param.unit || ''}` : '',
+      pMin: param?.min ?? 0, pMax: param?.max ?? 100, pStep: param?.step ?? 1, pVal: pv ?? 0,
+      setP: e => this.setState({ p: +e.target.value }),
+      hasNote: !!note, note
+    };
+  }
+}
+</script>
+</body>
+</html>

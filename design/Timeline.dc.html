@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div tabIndex="0" onKeyDown="{{ onKey }}" style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22;outline:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Timeline</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button onClick="{{ prev }}" aria-label="Previous" style="width:36px;height:36px;border:none;border-radius:50%;background:#F4F5F7;font-size:16px;color:#1B1D22;opacity:{{ prevOp }}">←</button>
+      <button onClick="{{ next }}" aria-label="Next" style="width:36px;height:36px;border:none;border-radius:50%;background:#F4F5F7;font-size:16px;color:#1B1D22;opacity:{{ nextOp }}">→</button>
+    </div>
+  </div>
+  <div style="overflow-x:auto;padding-bottom:4px">
+    <div style="position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px,1fr);min-width:{{ minW }};padding:8px 0 4px">
+      <div style="position:absolute;left:0;right:0;top:57px;height:4px;border-radius:2px;background:oklch(0.92 0.03 195)"></div>
+      <div style="position:absolute;left:0;top:57px;height:4px;border-radius:2px;background:oklch(0.52 0.12 195);transition:width .3s;width:{{ fill }}"></div>
+      <sc-for list="{{ events }}" as="e" hint-placeholder-count="5">
+        <button onClick="{{ e.onClick }}" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;background:transparent;border:none;padding:0 4px;color:#1B1D22">
+          <span style="font-size:14px;font-weight:700;height:20px;white-space:nowrap;font-variant-numeric:tabular-nums;color:{{ e.dateColor }}">{{ e.date }}</span>
+          <span style="width:22px;height:22px;border-radius:50%;margin:8px 0;transition:transform .2s;background:{{ e.dot }};border:4px solid {{ e.ring }};transform:{{ e.scale }}"></span>
+          <span style="font-size:14px;font-weight:500;line-height:1.3;text-align:center;text-wrap:balance;color:{{ e.titleColor }}">{{ e.title }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px;background:oklch(0.97 0.015 195);border-radius:16px;padding:16px 18px">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.01em">{{ selTitle }}</span>
+      <span style="font-size:15px;font-weight:700;color:oklch(0.4 0.1 195)">{{ selDate }}</span>
+    </div>
+    <sc-if value="{{ hasBody }}"><span style="font-size:16px;line-height:1.55;color:#3E424B;text-wrap:pretty">{{ selBody }}</span></sc-if>
+    <sc-if value="{{ hasGap }}"><span style="font-size:14px;color:#5C606B">{{ gap }}</span></sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:820,&quot;height&quot;:400},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;The Scientific Revolution and after&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;events&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{date:string, title:string, body?:string}[]&quot;}}">
+const DEMO = [
+  { date: '1440', title: 'Printing press', body: 'Gutenberg\u2019s movable type makes books cheap. Ideas spread faster than ever before.' },
+  { date: '1543', title: 'Copernicus', body: 'Proposes that the Earth orbits the Sun, challenging the Earth-centered model.' },
+  { date: '1609', title: 'Galileo\u2019s telescope', body: 'Observes Jupiter\u2019s moons and the phases of Venus, which is evidence for Copernicus.' },
+  { date: '1687', title: 'Newton\u2019s Principia', body: 'Laws of motion and universal gravitation explain both falling apples and planetary orbits.' },
+  { date: '1859', title: 'On the Origin of Species', body: 'Darwin explains how species change over time by natural selection.' },
+  { date: '1905', title: 'Special relativity', body: 'Einstein shows that space and time depend on the observer\u2019s motion. E = mc².' }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const T = 'oklch(0.52 0.12 195)';
+
+class Component extends DCLogic {
+  state = { i: 0 };
+  ev() { const p = parse(this.props.events); return Array.isArray(p) && p.length ? p : DEMO; }
+  go = d => this.setState(s => ({ i: Math.max(0, Math.min(this.ev().length - 1, s.i + d)) }));
+  renderVals() {
+    const E = this.ev(), i = this.state.i, cur = E[i], prev = E[i - 1];
+    const yr = s => { const m = String(s).match(/-?\d{3,4}/); return m ? +m[0] : null; };
+    const g = prev && yr(cur.date) != null && yr(prev.date) != null ? yr(cur.date) - yr(prev.date) : null;
+    return {
+      title: this.props.title ?? 'The Scientific Revolution and after',
+      minW: E.length * 120 + 'px',
+      fill: E.length > 1 ? ((i + 0.5) / E.length) * 100 + '%' : '50%',
+      events: E.map((e, k) => ({
+        date: e.date, title: e.title,
+        dot: k <= i ? T : '#FFFFFF', ring: k === i ? 'oklch(0.85 0.07 195)' : k < i ? T : 'oklch(0.85 0.05 195)',
+        scale: k === i ? 'scale(1.25)' : 'scale(1)',
+        dateColor: k === i ? 'oklch(0.4 0.1 195)' : '#5C606B', titleColor: k === i ? '#1B1D22' : '#5C606B',
+        onClick: () => this.setState({ i: k })
+      })),
+      prev: () => this.go(-1), next: () => this.go(1), prevOp: i === 0 ? 0.35 : 1, nextOp: i === E.length - 1 ? 0.35 : 1,
+      onKey: e => { if (e.key === 'ArrowRight') this.go(1); if (e.key === 'ArrowLeft') this.go(-1); },
+      selTitle: cur.title, selDate: cur.date, selBody: cur.body || '', hasBody: !!cur.body,
+      hasGap: g != null && g > 0, gap: g ? `${g} years after ${prev.title}` : ''
+    };
+  }
+}
+</script>
+</body>
+</html>

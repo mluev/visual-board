@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button,input{font:inherit}button{cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Pattern</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <div style="display:flex;background:#F4F5F7;border-radius:999px;padding:4px;gap:2px">
+      <button onClick="{{ setLearn }}" style="border:none;border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700;background:{{ lBg }};color:{{ lColor }}">Study</button>
+      <button onClick="{{ setPractice }}" style="border:none;border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700;background:{{ pBg }};color:{{ pColor }}">Practice</button>
+    </div>
+  </div>
+  <sc-if value="{{ hasSub }}"><div style="font-size:15px;color:#3E424B;line-height:1.5;text-wrap:pretty">{{ subtitle }}</div></sc-if>
+  <div style="overflow-x:auto">
+    <div style="display:grid;min-width:{{ minW }};grid-template-columns:{{ cols }};gap:6px">
+      <div></div>
+      <sc-for list="{{ heads }}" as="h" hint-placeholder-count="2"><div style="padding:8px 12px;font-size:14px;font-weight:700;color:oklch(0.4 0.1 195);background:oklch(0.97 0.015 195);border-radius:10px">{{ h }}</div></sc-for>
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+        <div style="padding:10px 12px 10px 0;font-size:15px;font-weight:700;color:#5C606B;align-self:center">{{ r.label }}</div>
+        <sc-for list="{{ r.cells }}" as="c">
+          <div style="border-radius:10px;padding:6px 8px;display:flex;align-items:center;gap:6px;min-height:36px;background:{{ c.bg }};border:2px solid {{ c.border }}">
+            <sc-if value="{{ c.study }}"><span style="font-size:17px;padding:0 4px"><span>{{ c.stem }}</span><span style="font-weight:700;color:oklch(0.48 0.13 195);background:oklch(0.93 0.04 195);border-radius:4px;padding:0 2px">{{ c.end }}</span></span></sc-if>
+            <sc-if value="{{ c.practice }}"><input value="{{ c.value }}" onChange="{{ c.onChange }}" readOnly="{{ c.locked }}" spellCheck="false" style="width:100%;min-width:0;font-size:16px;padding:4px 6px;border:none;outline:none;background:transparent;color:#1B1D22"></sc-if>
+            <sc-if value="{{ c.showFix }}"><span style="font-size:13px;font-weight:700;color:oklch(0.48 0.13 155);white-space:nowrap">{{ c.fix }}</span></sc-if>
+          </div>
+        </sc-for>
+      </sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ hasNote }}"><div style="font-size:15px;line-height:1.5;color:#3E424B;background:#F4F5F7;border-radius:12px;padding:10px 14px;text-wrap:pretty">{{ note }}</div></sc-if>
+  <sc-if value="{{ inPractice }}">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #ECEEF1;flex-wrap:wrap">
+      <sc-if value="{{ checked }}">
+        <div style="display:flex;align-items:baseline;gap:12px"><span style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-weight:700;line-height:1;color:oklch(0.4 0.1 195)">{{ score }}</span><span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span></div>
+        <button onClick="{{ retry }}" style="background:oklch(0.95 0.03 195);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Try again</button>
+      </sc-if>
+      <sc-if value="{{ unchecked }}">
+        <span style="font-size:15px;color:#5C606B">Fill in every form from memory</span>
+        <button onClick="{{ check }}" style="background:oklch(0.52 0.12 195);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700">Check</button>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:600},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Spanish -ar verbs: hablar (to speak)&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;subtitle&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;columns&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;rows&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{label:string, cells:string[] — 'stem|ending' highlights the ending}[]&quot;},&quot;note&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;study&quot;,&quot;practice&quot;],&quot;default&quot;:&quot;study&quot;,&quot;tsType&quot;:&quot;'study'|'practice'&quot;}}">
+const DEMO = {
+  title: 'Spanish -ar verbs: hablar (to speak)',
+  subtitle: 'Keep the stem habl-, then add the ending for the person and tense.',
+  columns: ['Present', 'Preterite (past)'],
+  rows: [
+    { label: 'yo', cells: ['habl|o', 'habl|é'] }, { label: 'tú', cells: ['habl|as', 'habl|aste'] }, { label: 'él / ella', cells: ['habl|a', 'habl|ó'] },
+    { label: 'nosotros', cells: ['habl|amos', 'habl|amos'] }, { label: 'vosotros', cells: ['habl|áis', 'habl|asteis'] }, { label: 'ellos', cells: ['habl|an', 'habl|aron'] }
+  ],
+  note: 'Watch the accents: hablo = "I speak", but habló = "he spoke". Nosotros is the same in both tenses, so context tells them apart.'
+};
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } } return v; };
+const clean = s => String(s || '').trim().toLowerCase();
+
+class Component extends DCLogic {
+  state = { mode: this.props.initial === 'practice' ? 'practice' : 'study', vals: {}, checked: false };
+  cfg() { return this.props.rows == null ? DEMO : { title: this.props.title, subtitle: this.props.subtitle, columns: parse(this.props.columns) || [], rows: parse(this.props.rows) || [], note: this.props.note }; }
+  renderVals() {
+    const C = this.cfg(), { mode, vals, checked } = this.state, pr = mode === 'practice';
+    let total = 0, right = 0;
+    const rows = C.rows.map((r, ri) => ({
+      label: r.label,
+      cells: r.cells.map((cell, ci) => {
+        const [stem, end = ''] = String(cell).split('|'), full = stem + end, key = ri + ':' + ci, v = vals[key] || '';
+        total++; const ok = clean(v) === clean(full); if (ok) right++;
+        const bad = pr && checked && !ok, good = pr && checked && ok;
+        return {
+          stem, end, study: !pr, practice: pr, value: v, locked: checked,
+          onChange: e => { const x = e.target.value; this.setState(s => ({ vals: { ...s.vals, [key]: x } })); },
+          bg: good ? 'oklch(0.95 0.04 155)' : bad ? 'oklch(0.95 0.03 25)' : pr ? '#FFFFFF' : '#F4F5F7',
+          border: good ? 'oklch(0.48 0.13 155)' : bad ? 'oklch(0.52 0.17 25)' : pr ? '#E2E4E9' : '#F4F5F7',
+          showFix: bad, fix: full
+        };
+      })
+    }));
+    const n = C.columns.length;
+    return {
+      title: this.props.title ?? C.title ?? 'Pattern', subtitle: C.subtitle || '', hasSub: !!C.subtitle,
+      heads: C.columns, rows, cols: `minmax(90px,auto) repeat(${n}, minmax(140px,1fr))`, minW: 90 + n * 140 + 'px',
+      note: C.note || '', hasNote: !!C.note && !pr,
+      setLearn: () => this.setState({ mode: 'study', checked: false }), setPractice: () => this.setState({ mode: 'practice', vals: {}, checked: false }),
+      lBg: pr ? 'transparent' : '#FFFFFF', lColor: pr ? '#5C606B' : '#1B1D22', pBg: pr ? '#FFFFFF' : 'transparent', pColor: pr ? '#1B1D22' : '#5C606B',
+      inPractice: pr, checked, unchecked: !checked,
+      check: () => this.setState({ checked: true }), retry: () => this.setState({ vals: {}, checked: false }),
+      score: `${right}/${total}`, scoreLine: right === total ? 'Every form correct, accents included.' : 'The correct forms are shown in green.'
+    };
+  }
+}
+</script>
+</body>
+</html>

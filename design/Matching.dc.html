@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.5 0.11 85);border-radius:999px;padding:5px 12px;flex-shrink:0">Match</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <span style="font-size:14px;font-weight:500;color:#5C606B;flex-shrink:0">{{ progress }}</span>
+  </div>
+  <div style="font-size:15px;color:#5C606B">{{ instruction }}</div>
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 16px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ lefts }}" as="c" hint-placeholder-count="4">
+        <button onClick="{{ c.onClick }}" style="text-align:left;padding:12px 14px;border-radius:14px;font-size:16px;font-weight:500;min-height:52px;transition:background .15s,border-color .15s;background:{{ c.bg }};border:2px solid {{ c.border }};color:{{ c.color }};font-family:{{ c.font }}">{{ c.text }}</button>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ rights }}" as="c" hint-placeholder-count="4">
+        <button onClick="{{ c.onClick }}" style="text-align:left;padding:12px 14px;border-radius:14px;font-size:16px;font-weight:500;min-height:52px;transition:background .15s,border-color .15s;background:{{ c.bg }};border:2px solid {{ c.border }};color:{{ c.color }};font-family:{{ c.font }}">{{ c.text }}</button>
+      </sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ done }}">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #ECEEF1;flex-wrap:wrap">
+      <div style="display:flex;align-items:baseline;gap:12px">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-weight:700;line-height:1;color:oklch(0.42 0.1 85)">{{ score }}</span>
+        <span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span>
+      </div>
+      <button onClick="{{ reset }}" style="background:oklch(0.95 0.04 85);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Shuffle and retry</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:480},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Cell parts and their jobs&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;pairs&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{left:string, right:string}[]&quot;},&quot;mono&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;play&quot;,&quot;done&quot;],&quot;default&quot;:&quot;play&quot;,&quot;tsType&quot;:&quot;'play'|'done'&quot;}}">
+const DEMO = [
+  { left: 'mitochondria', right: 'Makes ATP for the cell' },
+  { left: 'ribosome', right: 'Builds proteins' },
+  { left: 'nucleus', right: 'Stores the DNA' },
+  { left: 'cell membrane', right: 'Controls what enters and leaves' },
+  { left: 'chloroplast', right: 'Captures light for photosynthesis' }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const shuffle = (n, seed) => { const a = [...Array(n).keys()]; let s = seed; for (let i = n - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor((s / 233280) * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } if (n > 1 && a.every((v, i) => v === i)) a.push(a.shift()); return a; };
+const HUES = [85, 195, 290, 45, 250, 340, 130, 20];
+
+class Component extends DCLogic {
+  state = this.initState();
+  pairs() { const p = parse(this.props.pairs); return Array.isArray(p) && p.length ? p : DEMO; }
+  initState() {
+    const n = this.pairs().length;
+    if (this.props.initial === 'done') return { order: shuffle(n, 7), sel: null, matched: [...Array(n).keys()], wrong: null, misses: 2, seed: 7 };
+    return { order: shuffle(n, 7), sel: null, matched: [], wrong: null, misses: 0, seed: 7 };
+  }
+  pickLeft(i) { if (this.state.matched.includes(i)) return; this.setState(s => ({ sel: s.sel === i ? null : i, wrong: null })); }
+  pickRight(i) {
+    const { sel, matched } = this.state;
+    if (matched.includes(i) || sel == null) return;
+    if (sel === i) this.setState({ matched: [...matched, i], sel: null, wrong: null });
+    else { this.setState(s => ({ wrong: i, misses: s.misses + 1 })); clearTimeout(this.t); this.t = setTimeout(() => this.setState({ wrong: null }), 600); }
+  }
+  componentWillUnmount() { clearTimeout(this.t); }
+  reset = () => { const seed = this.state.seed + 13; this.setState({ order: shuffle(this.pairs().length, seed), sel: null, matched: [], wrong: null, misses: 0, seed }); };
+  renderVals() {
+    const P = this.pairs(), { order, sel, matched, wrong, misses } = this.state;
+    const mono = !!this.props.mono;
+    const style = (i, side) => {
+      const mi = matched.indexOf(i);
+      if (mi >= 0) { const h = HUES[mi % HUES.length]; return { bg: `oklch(0.96 0.03 ${h})`, border: `oklch(0.7 0.1 ${h})`, color: '#3E424B' }; }
+      if (side === 'l' && sel === i) return { bg: 'oklch(0.95 0.04 85)', border: 'oklch(0.5 0.11 85)', color: '#1B1D22' };
+      if (side === 'r' && wrong === i) return { bg: 'oklch(0.95 0.03 25)', border: 'oklch(0.52 0.17 25)', color: '#1B1D22' };
+      return { bg: '#F4F5F7', border: '#F4F5F7', color: '#1B1D22' };
+    };
+    const done = matched.length === P.length;
+    const acc = Math.round((P.length / (P.length + misses)) * 100);
+    return {
+      title: this.props.title ?? 'Cell parts and their jobs',
+      progress: `${matched.length} / ${P.length} matched`,
+      instruction: done ? 'All pairs matched.' : sel == null ? 'Pick an item on the left, then its match on the right.' : 'Now pick its match on the right.',
+      lefts: P.map((p, i) => ({ text: p.left, font: mono ? "'JetBrains Mono',monospace" : 'inherit', ...style(i, 'l'), onClick: () => this.pickLeft(i) })),
+      rights: order.map(i => ({ text: P[i].right, font: 'inherit', ...style(i, 'r'), onClick: () => this.pickRight(i) })),
+      done, reset: this.reset,
+      score: `${acc}%`,
+      scoreLine: misses ? `${P.length} pairs, ${misses} wrong ${misses === 1 ? 'try' : 'tries'}.` : `${P.length} pairs, no mistakes.`
+    };
+  }
+}
+</script>
+</body>
+</html>

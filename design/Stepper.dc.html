@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}input[type=range]{width:100%}</style>
+</helmet>
+<div tabIndex="0" onKeyDown="{{ onKey }}" style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22;outline:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Step through</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <span style="font-size:14px;font-weight:500;color:#5C606B;font-variant-numeric:tabular-nums">{{ pos }}</span>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;background:oklch(0.97 0.015 195);border-radius:16px;padding:18px 16px 12px">
+    <div style="display:grid;gap:8px;align-items:end;height:{{ areaH }};grid-template-columns:repeat({{ cols }},minmax(0,1fr))">
+      <sc-for list="{{ cells }}" as="c" hint-placeholder-count="6">
+        <div style="display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;gap:6px;height:100%">
+          <div style="display:flex;align-items:flex-start;justify-content:center;padding-top:6px;border-radius:10px;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;transition:height .3s,background .2s;height:{{ c.h }};background:{{ c.bg }};color:{{ c.color }};border:2px solid {{ c.border }}">{{ c.v }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;gap:8px;grid-template-columns:repeat({{ cols }},minmax(0,1fr))">
+      <sc-for list="{{ cells }}" as="c" hint-placeholder-count="6"><div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-height:34px"><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8A8F99">{{ c.i }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:oklch(0.4 0.1 195)">{{ c.ptr }}</span></div></sc-for>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px;min-height:60px">
+    <span style="font-size:17px;font-weight:500;line-height:1.45;text-wrap:pretty">{{ caption }}</span>
+    <sc-if value="{{ hasVars }}">
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <sc-for list="{{ vars }}" as="v"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;background:#F4F5F7;border-radius:8px;padding:4px 8px">{{ v.k }} = {{ v.v }}</span></sc-for>
+      </div>
+    </sc-if>
+  </div>
+  <div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center">
+    <div style="display:flex;gap:6px">
+      <button onClick="{{ first }}" aria-label="Restart" style="width:40px;height:40px;border:none;border-radius:50%;background:#F4F5F7;font-size:14px;color:#1B1D22">⟲</button>
+      <button onClick="{{ prev }}" aria-label="Back" style="width:40px;height:40px;border:none;border-radius:50%;background:#F4F5F7;font-size:16px;color:#1B1D22">←</button>
+      <button onClick="{{ toggle }}" style="height:40px;border:none;border-radius:999px;background:oklch(0.52 0.12 195);color:#FFFFFF;font-size:15px;font-weight:700;padding:0 18px;min-width:88px">{{ playLabel }}</button>
+      <button onClick="{{ next }}" aria-label="Forward" style="width:40px;height:40px;border:none;border-radius:50%;background:#F4F5F7;font-size:16px;color:#1B1D22">→</button>
+    </div>
+    <input type="range" min="0" max="{{ last }}" value="{{ i }}" onChange="{{ scrub }}" style="accent-color:oklch(0.52 0.12 195)">
+    <button onClick="{{ cycleSpeed }}" style="border:none;border-radius:999px;background:#F4F5F7;padding:9px 12px;font-size:14px;font-weight:700;color:#1B1D22;font-variant-numeric:tabular-nums">{{ speedLabel }}</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:520},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Bubble sort, one step at a time&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;steps&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{cells:(number|string)[], caption?:string, hl?:number[], swap?:number[], done?:number[], ptr?:{[index]:string}, vars?:object}[] | (()=&gt;steps)&quot;},&quot;bars&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const bubble = arr => {
+  const a = [...arr], S = [{ cells: [...a], caption: 'Bubble sort: compare neighbours and swap them if they\u2019re out of order.', vars: { pass: 0 } }], n = a.length, done = [];
+  for (let p = 0; p < n - 1; p++) {
+    let swapped = false;
+    for (let j = 0; j < n - 1 - p; j++) {
+      S.push({ cells: [...a], hl: [j, j + 1], done: [...done], ptr: { [j]: 'j', [j + 1]: 'j+1' }, caption: `Compare ${a[j]} and ${a[j + 1]}.`, vars: { pass: p + 1, j } });
+      if (a[j] > a[j + 1]) { [a[j], a[j + 1]] = [a[j + 1], a[j]]; swapped = true; S.push({ cells: [...a], swap: [j, j + 1], done: [...done], ptr: { [j]: 'j', [j + 1]: 'j+1' }, caption: `${a[j + 1]} > ${a[j]}, so swap them.`, vars: { pass: p + 1, j } }); }
+    }
+    done.push(n - 1 - p);
+    S.push({ cells: [...a], done: [...done], caption: `Pass ${p + 1} done: ${a[n - 1 - p]} has bubbled to its final place.`, vars: { pass: p + 1 } });
+    if (!swapped) { S.push({ cells: [...a], done: [...Array(n).keys()], caption: 'No swaps in this pass, so the array is sorted. Worst case O(n²).', vars: { pass: p + 1 } }); return S; }
+  }
+  S.push({ cells: [...a], done: [...Array(n).keys()], caption: 'Sorted. Worst case O(n²) comparisons.' });
+  return S;
+};
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } } return v; };
+const SPEEDS = [0.5, 1, 2];
+
+class Component extends DCLogic {
+  state = { i: 0, playing: false, sp: 1 };
+  steps() { const s = this.props.steps; const v = typeof s === 'function' ? s() : parse(s); return Array.isArray(v) && v.length ? v : bubble([5, 2, 8, 1, 9, 3]); }
+  componentWillUnmount() { clearInterval(this.t); }
+  tick() { clearInterval(this.t); if (!this.state.playing) return; this.t = setInterval(() => { const n = this.steps().length; if (this.state.i >= n - 1) { clearInterval(this.t); this.setState({ playing: false }); } else this.setState(s => ({ i: s.i + 1 })); }, 900 / SPEEDS[this.state.sp]); }
+  set(p) { this.setState(p, () => this.tick()); }
+  go = d => this.setState(s => ({ i: Math.max(0, Math.min(this.steps().length - 1, s.i + d)) }));
+  renderVals() {
+    const S = this.steps(), { i, playing, sp } = this.state, st = S[Math.min(i, S.length - 1)];
+    const all = S.flatMap(s => s.cells.map(Number).filter(x => !isNaN(x))), max = Math.max(...all, 1);
+    const bars = this.props.bars ?? true;
+    return {
+      title: this.props.title ?? 'Bubble sort, one step at a time',
+      pos: `Step ${i + 1} / ${S.length}`,
+      cols: st.cells.length, areaH: bars ? '180px' : '64px',
+      cells: st.cells.map((v, k) => {
+        const hl = (st.hl || []).includes(k), sw = (st.swap || []).includes(k), dn = (st.done || []).includes(k);
+        const bg = sw ? 'oklch(0.6 0.16 45)' : hl ? 'oklch(0.52 0.12 195)' : dn ? 'oklch(0.9 0.05 155)' : '#FFFFFF';
+        return { v, i: k, ptr: (st.ptr || {})[k] || '', h: bars && !isNaN(+v) ? Math.max(40, (+v / max) * 170) + 'px' : '56px', bg, color: hl || sw ? '#FFFFFF' : '#1B1D22', border: hl ? 'oklch(0.52 0.12 195)' : sw ? 'oklch(0.6 0.16 45)' : dn ? 'oklch(0.75 0.09 155)' : 'oklch(0.88 0.04 195)' };
+      }),
+      caption: st.caption || '', vars: Object.entries(st.vars || {}).map(([k, v]) => ({ k, v: String(v) })), hasVars: !!st.vars,
+      i, last: S.length - 1, scrub: e => this.set({ i: +e.target.value, playing: false }),
+      first: () => this.set({ i: 0, playing: false }), prev: () => { this.set({ playing: false }); this.go(-1); }, next: () => { this.set({ playing: false }); this.go(1); },
+      toggle: () => this.set({ playing: !playing, i: !playing && i >= S.length - 1 ? 0 : i }),
+      playLabel: playing ? 'Pause' : i >= S.length - 1 ? 'Replay' : 'Play',
+      cycleSpeed: () => this.set({ sp: (sp + 1) % SPEEDS.length }), speedLabel: SPEEDS[sp] + '×',
+      onKey: e => { if (e.key === 'ArrowRight') this.go(1); if (e.key === 'ArrowLeft') this.go(-1); if (e.key === ' ') { e.preventDefault(); this.set({ playing: !playing }); } }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}input[type=range]{width:100%}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:18px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Chart</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:21px;font-weight:700;letter-spacing:-.01em;text-wrap:balance">{{ title }}</span>
+    </div>
+    <sc-if value="{{ allowLog }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;background:#F4F5F7;border-radius:999px;padding:4px;gap:2px">
+        <button onClick="{{ setLin }}" style="border:none;border-radius:999px;padding:7px 14px;font-size:14px;font-weight:700;background:{{ linBg }};color:{{ linColor }}">Linear</button>
+        <button onClick="{{ setLog }}" style="border:none;border-radius:999px;padding:7px 14px;font-size:14px;font-weight:700;background:{{ logBg }};color:{{ logColor }}">Log</button>
+      </div>
+    </sc-if>
+  </div>
+  <div style="display:flex;flex-direction:column;background:oklch(0.97 0.015 195);border-radius:16px;padding:16px 16px 12px">
+    <div style="display:grid;grid-template-columns:repeat({{ cols }},minmax(0,1fr));gap:12px;border-bottom:2px solid oklch(0.85 0.05 195)">
+      <sc-for list="{{ bars }}" as="b" hint-placeholder-count="4">
+        <div onMouseEnter="{{ b.enter }}" onMouseLeave="{{ b.leave }}" style="height:220px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px">
+          <span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap">{{ b.value }}</span>
+          <div style="width:62%;max-width:72px;border-radius:10px 10px 0 0;height:{{ b.h }};background:{{ b.color }};transition:height .25s,background .15s"></div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat({{ cols }},minmax(0,1fr));gap:12px;padding-top:8px">
+      <sc-for list="{{ bars }}" as="b" hint-placeholder-count="4"><div style="text-align:center;font-size:14px;font-weight:500;color:#5C606B;text-wrap:balance">{{ b.label }}</div></sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ hasParam }}">
+    <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center">
+      <span style="font-size:15px;font-weight:700;color:oklch(0.4 0.1 195);font-variant-numeric:tabular-nums;min-width:90px">{{ paramLabel }}</span>
+      <input type="range" min="{{ pMin }}" max="{{ pMax }}" step="{{ pStep }}" value="{{ pVal }}" onChange="{{ setP }}" style="accent-color:oklch(0.52 0.12 195)">
+    </div>
+  </sc-if>
+  <sc-if value="{{ hasNote }}"><div style="font-size:16px;line-height:1.5;color:#3E424B;text-wrap:pretty">{{ note }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:520},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;How much work does each algorithm do?&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;data&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{label:string, value:number}[] | ((p:number)=&gt;{label:string, value:number}[])&quot;},&quot;param&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{name:string, min:number, max:number, step?:number, value:number}&quot;},&quot;note&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string | ((p:number, data)=&gt;string)&quot;},&quot;highlight&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number | string&quot;},&quot;unit&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;allowLog&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const DEMO_PARAM = { name: 'n', min: 2, max: 64, step: 1, value: 16 };
+const DEMO = n => { const l = Math.log2(n); return [{ label: 'O(log n)', value: l }, { label: 'O(n)', value: n }, { label: 'O(n log n)', value: n * l }, { label: 'O(n²)', value: n * n }]; };
+const DEMO_NOTE = (n, d) => `At n = ${n}, O(n²) does ${n}× the work of O(n), and ${Math.round(d[3].value / d[0].value).toLocaleString()}× the work of O(log n).`;
+const fmtV = (v, unit) => (Math.abs(v) < 10 && v % 1 ? v.toFixed(1) : Math.round(v).toLocaleString()) + (unit || '');
+
+class Component extends DCLogic {
+  state = { log: false, hover: -1, p: null };
+  demo() { return this.props.data == null; }
+  param() { return this.demo() ? DEMO_PARAM : parse(this.props.param); }
+  renderVals() {
+    const param = this.param();
+    const pv = this.state.p ?? param?.value;
+    const raw = this.demo() ? DEMO : this.props.data;
+    const data = (typeof raw === 'function' ? raw(pv) : parse(raw)) || [];
+    const hl = this.demo() ? 3 : this.props.highlight;
+    const max = Math.max(...data.map(d => d.value), 1e-9);
+    const { log, hover } = this.state;
+    const noteSrc = this.demo() ? DEMO_NOTE : this.props.note;
+    const note = typeof noteSrc === 'function' ? noteSrc(pv, data) : (noteSrc || '');
+    const allowLog = this.props.allowLog ?? this.demo();
+    return {
+      title: this.props.title ?? 'How much work does each algorithm do?',
+      cols: data.length || 1,
+      allowLog,
+      setLin: () => this.setState({ log: false }), setLog: () => this.setState({ log: true }),
+      linBg: log ? 'transparent' : '#FFFFFF', linColor: log ? '#5C606B' : '#1B1D22',
+      logBg: log ? '#FFFFFF' : 'transparent', logColor: log ? '#1B1D22' : '#5C606B',
+      bars: data.map((d, i) => {
+        const isHl = i === hl || d.label === hl, isHov = i === hover;
+        const f = log ? Math.log(Math.max(d.value, 0) + 1) / Math.log(max + 1) : Math.max(d.value, 0) / max;
+        return {
+          label: d.label, value: fmtV(d.value, this.props.unit),
+          h: Math.max(3, f * 180) + 'px',
+          color: isHov ? 'oklch(0.42 0.12 195)' : isHl ? 'oklch(0.52 0.12 195)' : 'oklch(0.8 0.07 195)',
+          enter: () => this.setState({ hover: i }), leave: () => this.setState({ hover: -1 })
+        };
+      }),
+      hasParam: !!param, paramLabel: param ? `${param.name ?? 'x'} = ${pv}` : '',
+      pMin: param?.min ?? 0, pMax: param?.max ?? 100, pStep: param?.step ?? 1, pVal: pv ?? 0,
+      setP: e => this.setState({ p: +e.target.value }),
+      hasNote: !!note, note
+    };
+  }
+}
+</script>
+</body>
+</html>

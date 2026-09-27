@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.55 0.16 340);border-radius:999px;padding:5px 12px;flex-shrink:0">Whiteboard</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;background:#F4F5F7;border-radius:999px;padding:4px;gap:2px">
+        <sc-for list="{{ tools }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.onClick }}" style="border:none;border-radius:999px;padding:6px 12px;font-size:14px;font-weight:700;background:{{ t.bg }};color:{{ t.color }}">{{ t.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;background:#F4F5F7;border-radius:999px;padding:6px 8px;gap:6px">
+        <sc-for list="{{ colors }}" as="c" hint-placeholder-count="4">
+          <button onClick="{{ c.onClick }}" aria-label="{{ c.name }}" style="width:22px;height:22px;border-radius:50%;padding:0;background:{{ c.value }};border:3px solid {{ c.ring }};box-shadow:0 0 0 1px {{ c.outer }}"></button>
+        </sc-for>
+      </div>
+      <div style="display:flex;background:#F4F5F7;border-radius:999px;padding:4px;gap:2px">
+        <sc-for list="{{ sizes }}" as="s" hint-placeholder-count="3">
+          <button onClick="{{ s.onClick }}" aria-label="{{ s.name }}" style="border:none;border-radius:999px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:{{ s.bg }}"><span style="border-radius:50%;background:#1B1D22;width:{{ s.dot }};height:{{ s.dot }}"></span></button>
+        </sc-for>
+      </div>
+      <button onClick="{{ undo }}" style="border:none;border-radius:999px;background:#F4F5F7;padding:8px 12px;font-size:14px;font-weight:700;color:#1B1D22;opacity:{{ undoOpacity }}">Undo</button>
+      <button onClick="{{ clear }}" style="border:none;border-radius:999px;background:#F4F5F7;padding:8px 12px;font-size:14px;font-weight:700;color:#1B1D22">Clear</button>
+    </div>
+  </div>
+  <sc-if value="{{ hasPrompt }}"><div style="font-size:16px;line-height:1.5;color:#3E424B;text-wrap:pretty">{{ prompt }}</div></sc-if>
+  <div style="position:relative;border-radius:16px;overflow:hidden;background-color:#FCFCFD;background-image:radial-gradient(circle,#D5D8DE 1.2px,transparent 1.3px);background-size:24px 24px;border:1px solid #ECEEF1;height:{{ height }}">
+    <canvas ref="{{ canvasRef }}" onPointerDown="{{ down }}" onPointerMove="{{ move }}" onPointerUp="{{ up }}" onPointerLeave="{{ up }}" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair"></canvas>
+    <sc-if value="{{ empty }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:15px;color:#8A8F99">Draw, sketch or work it out here</div></sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:820,&quot;height&quot;:500},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Scratchpad&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;prompt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;height&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:360,&quot;min&quot;:160,&quot;max&quot;:900,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;},&quot;boardId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const COLORS = [['Ink', '#1B1D22'], ['Blue', 'oklch(0.52 0.16 250)'], ['Coral', 'oklch(0.58 0.18 30)'], ['Green', 'oklch(0.55 0.14 155)']];
+const SIZES = [['Thin', 2, '5px'], ['Medium', 4, '8px'], ['Thick', 9, '12px']];
+const TOOLS = [['pen', 'Pen'], ['marker', 'Marker'], ['eraser', 'Eraser']];
+
+class Component extends DCLogic {
+  state = { tool: 'pen', color: 0, size: 1, strokes: [] };
+  canvasRef = React.createRef();
+  cur = null;
+  key() { return this.props.boardId ? 'lk-wb-' + this.props.boardId : null; }
+  componentDidMount() {
+    const k = this.key();
+    if (k) try { const s = JSON.parse(localStorage.getItem(k)); if (Array.isArray(s)) this.setState({ strokes: s }, () => this.redraw()); } catch (e) {}
+    this.ro = new ResizeObserver(() => this.redraw());
+    if (this.canvasRef.current) this.ro.observe(this.canvasRef.current);
+    this.redraw();
+  }
+  componentWillUnmount() { this.ro && this.ro.disconnect(); }
+  save(strokes) { const k = this.key(); if (k) try { localStorage.setItem(k, JSON.stringify(strokes)); } catch (e) {} }
+  ctx() {
+    const c = this.canvasRef.current; if (!c) return null;
+    const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+    if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+    const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); return x;
+  }
+  drawStroke(x, s) {
+    if (!s.pts.length) return;
+    x.save();
+    x.globalCompositeOperation = s.tool === 'eraser' ? 'destination-out' : 'source-over';
+    x.globalAlpha = s.tool === 'marker' ? 0.35 : 1;
+    x.strokeStyle = s.color; x.lineWidth = s.tool === 'marker' ? s.w * 4 : s.tool === 'eraser' ? s.w * 5 : s.w;
+    x.lineCap = 'round'; x.lineJoin = 'round';
+    x.beginPath(); x.moveTo(s.pts[0][0], s.pts[0][1]);
+    if (s.pts.length === 1) x.lineTo(s.pts[0][0] + 0.1, s.pts[0][1]);
+    for (let i = 1; i < s.pts.length; i++) { const [a, b] = s.pts[i - 1], [c, d] = s.pts[i]; x.quadraticCurveTo(a, b, (a + c) / 2, (b + d) / 2); }
+    x.stroke(); x.restore();
+  }
+  redraw() {
+    const x = this.ctx(); if (!x) return; const c = this.canvasRef.current;
+    x.clearRect(0, 0, c.width, c.height);
+    this.state.strokes.forEach(s => this.drawStroke(x, s));
+    if (this.cur) this.drawStroke(x, this.cur);
+  }
+  pt(e) { const r = this.canvasRef.current.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+  down = e => {
+    e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId);
+    const { tool, color, size } = this.state;
+    this.cur = { tool, color: COLORS[color][1], w: SIZES[size][1], pts: [this.pt(e)] };
+    this.redraw();
+  };
+  move = e => { if (!this.cur) return; this.cur.pts.push(this.pt(e)); this.redraw(); };
+  up = () => {
+    if (!this.cur) return;
+    const strokes = [...this.state.strokes, this.cur]; this.cur = null;
+    this.setState({ strokes }, () => this.redraw()); this.save(strokes);
+  };
+  renderVals() {
+    const { tool, color, size, strokes } = this.state;
+    return {
+      title: this.props.title ?? 'Scratchpad',
+      prompt: this.props.prompt ?? '', hasPrompt: !!this.props.prompt,
+      height: (this.props.height ?? 360) + 'px',
+      canvasRef: this.canvasRef, down: this.down, move: this.move, up: this.up,
+      empty: !strokes.length,
+      tools: TOOLS.map(([k, label]) => ({ label, bg: tool === k ? '#FFFFFF' : 'transparent', color: tool === k ? '#1B1D22' : '#5C606B', onClick: () => this.setState({ tool: k }) })),
+      colors: COLORS.map(([name, value], i) => ({ name, value, ring: color === i ? '#FFFFFF' : value, outer: color === i ? value : 'transparent', onClick: () => this.setState({ color: i, tool: tool === 'eraser' ? 'pen' : tool }) })),
+      sizes: SIZES.map(([name, , dot], i) => ({ name, dot, bg: size === i ? '#FFFFFF' : 'transparent', onClick: () => this.setState({ size: i }) })),
+      undo: () => { const s = strokes.slice(0, -1); this.setState({ strokes: s }, () => this.redraw()); this.save(s); },
+      undoOpacity: strokes.length ? 1 : 0.4,
+      clear: () => { this.setState({ strokes: [] }, () => this.redraw()); this.save([]); }
+    };
+  }
+}
+</script>
+</body>
+</html>

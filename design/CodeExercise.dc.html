@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button,textarea{font:inherit}button{cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.5 0.11 85);border-radius:999px;padding:5px 12px;flex-shrink:0">Code</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#5C606B;background:#F4F5F7;border-radius:8px;padding:4px 8px">{{ langLabel }}</span>
+  </div>
+  <div style="font-size:16px;line-height:1.5;color:#3E424B;text-wrap:pretty">{{ task }}</div>
+  <div style="display:grid;grid-template-columns:auto minmax(0,1fr);background:#1B1D22;border-radius:14px;overflow:hidden">
+    <div style="padding:14px 10px 14px 14px;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.6;color:#5C606B;text-align:right;user-select:none;background:#16181C">
+      <sc-for list="{{ lineNums }}" as="n" hint-placeholder-count="6"><div>{{ n }}</div></sc-for>
+    </div>
+    <textarea value="{{ code }}" onChange="{{ onCode }}" onKeyDown="{{ onKey }}" rows="{{ rows }}" spellCheck="false" style="border:none;outline:none;resize:none;background:transparent;color:#ECEDEE;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.6;padding:14px;white-space:pre;overflow-x:auto;tab-size:2;caret-color:oklch(0.8 0.12 85)"></textarea>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <sc-if value="{{ hasHint }}"><button onClick="{{ nextHint }}" style="border:none;border-radius:999px;background:#F4F5F7;padding:9px 14px;font-size:14px;font-weight:700;color:#3E424B;opacity:{{ hintOp }}">{{ hintLabel }}</button></sc-if>
+      <sc-if value="{{ hasSolution }}"><button onClick="{{ toggleSol }}" style="border:none;border-radius:999px;background:#F4F5F7;padding:9px 14px;font-size:14px;font-weight:700;color:#3E424B">{{ solLabel }}</button></sc-if>
+      <button onClick="{{ resetCode }}" style="border:none;border-radius:999px;background:#F4F5F7;padding:9px 14px;font-size:14px;font-weight:700;color:#3E424B">Reset code</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span style="font-size:13px;color:#5C606B">{{ runHint }}</span>
+      <button onClick="{{ run }}" style="background:oklch(0.5 0.11 85);color:#FFFFFF;border:none;border-radius:999px;padding:11px 20px;font-size:15px;font-weight:700;opacity:{{ runOp }}">{{ runLabel }}</button>
+    </div>
+  </div>
+  <sc-if value="{{ showHints }}">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <sc-for list="{{ hints }}" as="h"><div style="font-size:15px;line-height:1.45;color:#3E424B;background:oklch(0.97 0.02 85);border-radius:12px;padding:10px 12px;text-wrap:pretty"><b>Hint {{ h.n }}.</b> {{ h.text }}</div></sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{ showSol }}"><pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.6;background:#F4F5F7;border-radius:14px;padding:14px;white-space:pre-wrap">{{ solution }}</pre></sc-if>
+  <sc-if value="{{ hasResults }}">
+    <div style="display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:1px solid #ECEEF1">
+      <div style="display:flex;align-items:baseline;gap:12px">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700;line-height:1;color:{{ sumColor }}">{{ passed }}</span>
+        <span style="font-size:15px;color:#3E424B">{{ sumLine }}</span>
+      </div>
+      <sc-for list="{{ results }}" as="r">
+        <div style="display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:12px;background:{{ r.bg }}">
+          <div style="display:flex;justify-content:space-between;gap:12px;font-family:'JetBrains Mono',monospace;font-size:14px"><span>{{ r.call }}</span><span style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;color:{{ r.color }}">{{ r.mark }}</span></div>
+          <sc-if value="{{ r.failed }}"><div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#3E424B">expected {{ r.expect }} · got {{ r.got }}</div></sc-if>
+        </div>
+      </sc-for>
+      <sc-if value="{{ hasLogs }}"><pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5;background:#F4F5F7;border-radius:12px;padding:10px 12px;white-space:pre-wrap;color:#3E424B">{{ logs }}</pre></sc-if>
+    </div>
+  </sc-if>
+  <sc-if value="{{ showSelf }}"><div style="font-size:14px;color:#5C606B;line-height:1.45">{{ selfLine }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:680,&quot;height&quot;:620},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Palindrome check&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;language&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;javascript&quot;,&quot;tsType&quot;:&quot;string — tests only run for javascript&quot;},&quot;task&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;starter&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tests&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{call:string, expect:any}[]&quot;},&quot;hints&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;solution&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;exerciseId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const DEMO = {
+  task: 'Write isPalindrome(s). It returns true if s reads the same forwards and backwards, ignoring case and anything that isn\u2019t a letter or digit.',
+  starter: 'function isPalindrome(s) {\n  // your code\n}\n',
+  tests: [{ call: 'isPalindrome("racecar")', expect: true }, { call: 'isPalindrome("Was it a car or a cat I saw?")', expect: true }, { call: 'isPalindrome("hello")', expect: false }, { call: 'isPalindrome("")', expect: true }],
+  hints: ['First clean the string: lowercase it and drop characters that don\u2019t match /[a-z0-9]/.', 'Compare the cleaned string with its reverse: [...t].reverse().join("").'],
+  solution: 'function isPalindrome(s) {\n  const t = s.toLowerCase().replace(/[^a-z0-9]/g, "");\n  return t === [...t].reverse().join("");\n}'
+};
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } } return v; };
+const WORKER = `onmessage=e=>{const{code,tests}=e.data;const logs=[];const console={log:(...a)=>logs.push(a.map(x=>typeof x==='string'?x:JSON.stringify(x)).join(' '))};let fns;try{fns=new Function('console',code+'\\n;return ['+tests.map(t=>'()=>('+t.call+')').join(',')+']')(console)}catch(err){postMessage({error:String(err),logs});return}const res=fns.map((f,i)=>{try{const g=f();return{ok:JSON.stringify(g)===JSON.stringify(tests[i].expect),got:JSON.stringify(g)}}catch(err){return{ok:false,got:String(err)}}});postMessage({res,logs})}`;
+
+class Component extends DCLogic {
+  cfg() { return !this.props.task && this.props.tests == null ? DEMO : { task: this.props.task ?? '', starter: this.props.starter ?? '', tests: parse(this.props.tests) || [], hints: parse(this.props.hints) || [], solution: this.props.solution ?? '' }; }
+  lang() { return this.props.language ?? 'javascript'; }
+  runnable() { return /^(js|javascript)$/i.test(this.lang()) && this.cfg().tests.length > 0; }
+  key() { return this.props.exerciseId ? 'lk-code-' + this.props.exerciseId : null; }
+  state = (() => { let code = this.cfg().starter; const k = this.key(); if (k) try { code = localStorage.getItem(k) ?? code; } catch (e) {} return { code, hintN: 0, sol: false, busy: false, out: null }; })();
+  componentWillUnmount() { this.w && this.w.terminate(); clearTimeout(this.to); }
+  setCode(code) { this.setState({ code }); const k = this.key(); if (k) try { localStorage.setItem(k, code); } catch (e) {} }
+  onKey = e => {
+    if (e.key === 'Tab') { e.preventDefault(); const t = e.target, a = t.selectionStart, b = t.selectionEnd, v = this.state.code; this.setCode(v.slice(0, a) + '  ' + v.slice(b)); requestAnimationFrame(() => { t.selectionStart = t.selectionEnd = a + 2; }); }
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); this.run(); }
+  };
+  run = () => {
+    if (!this.runnable() || this.state.busy) return;
+    const tests = this.cfg().tests;
+    this.w && this.w.terminate();
+    this.w = new Worker(URL.createObjectURL(new Blob([WORKER], { type: 'text/javascript' })));
+    this.setState({ busy: true });
+    this.to = setTimeout(() => { this.w.terminate(); this.setState({ busy: false, out: { error: 'Timed out after 2s — is there an infinite loop?', logs: [] } }); }, 2000);
+    this.w.onmessage = e => { clearTimeout(this.to); this.w.terminate(); this.setState({ busy: false, out: e.data }); };
+    this.w.postMessage({ code: this.state.code, tests });
+  };
+  renderVals() {
+    const C = this.cfg(), { code, hintN, sol, busy, out } = this.state, runnable = this.runnable();
+    const lines = code.split('\n').length;
+    const res = out && out.res ? out.res : null, passed = res ? res.filter(r => r.ok).length : 0;
+    return {
+      title: this.props.title ?? 'Palindrome check',
+      langLabel: this.lang(), task: C.task,
+      code, rows: Math.max(lines + 1, 6), lineNums: [...Array(Math.max(lines, 5)).keys()].map(i => i + 1),
+      onCode: e => this.setCode(e.target.value), onKey: this.onKey,
+      hasHint: C.hints.length > 0, hintOp: hintN >= C.hints.length ? 0.4 : 1,
+      hintLabel: hintN >= C.hints.length ? 'No more hints' : `Hint ${hintN + 1} of ${C.hints.length}`,
+      nextHint: () => this.setState(s => ({ hintN: Math.min(s.hintN + 1, C.hints.length) })),
+      showHints: hintN > 0, hints: C.hints.slice(0, hintN).map((text, i) => ({ n: i + 1, text })),
+      hasSolution: !!C.solution, solLabel: sol ? 'Hide solution' : 'Show solution', toggleSol: () => this.setState(s => ({ sol: !s.sol })),
+      showSol: sol, solution: C.solution,
+      resetCode: () => { this.setCode(C.starter); this.setState({ out: null }); },
+      run: this.run, runOp: runnable ? (busy ? 0.5 : 1) : 0.35, runLabel: busy ? 'Running…' : 'Run tests',
+      runHint: runnable ? '⌘/Ctrl + Enter' : '',
+      hasResults: !!out,
+      passed: out && out.error ? 'Error' : `${passed}/${C.tests.length}`,
+      sumColor: res && passed === C.tests.length ? 'oklch(0.48 0.13 155)' : 'oklch(0.52 0.17 25)',
+      sumLine: out && out.error ? out.error : passed === (C.tests.length) ? 'All tests pass.' : 'tests passing',
+      results: res ? res.map((r, i) => ({ call: C.tests[i].call, expect: JSON.stringify(C.tests[i].expect), got: r.got, failed: !r.ok, mark: r.ok ? 'Pass' : 'Fail', color: r.ok ? 'oklch(0.48 0.13 155)' : 'oklch(0.52 0.17 25)', bg: r.ok ? 'oklch(0.96 0.03 155)' : 'oklch(0.96 0.025 25)' })) : [],
+      hasLogs: !!(out && out.logs && out.logs.length), logs: out && out.logs ? out.logs.join('\n') : '',
+      showSelf: !runnable, selfLine: `${this.lang()} can't run in the browser. Write your answer, then compare it with the solution. You can also paste it back to Claude for a review.`
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button,input{font:inherit}button{cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;min-height:420px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.5 0.11 85);border-radius:999px;padding:5px 12px;flex-shrink:0">Listen</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <div style="display:flex;background:#F4F5F7;border-radius:999px;padding:4px;gap:2px">
+      <sc-for list="{{ modes }}" as="m" hint-placeholder-count="2">
+        <button onClick="{{ m.onClick }}" style="border:none;border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700;background:{{ m.bg }};color:{{ m.color }};opacity:{{ m.opacity }}">{{ m.label }}</button>
+      </sc-for>
+    </div>
+  </div>
+  <div style="height:8px;background:oklch(0.95 0.04 85);border-radius:4px"><div style="height:8px;border-radius:4px;background:oklch(0.5 0.11 85);width:{{ pct }};transition:width .3s"></div></div>
+  <sc-if value="{{ active }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:500;color:#5C606B"><span>{{ pos }}</span><span>{{ langName }}</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px;background:oklch(0.97 0.02 85);border-radius:18px">
+      <sc-if value="{{ isListen }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ play }}" style="width:64px;height:64px;border-radius:50%;border:none;background:oklch(0.5 0.11 85);color:#FFFFFF;font-size:22px">▶</button>
+          <button onClick="{{ playSlow }}" style="height:64px;border-radius:999px;border:none;background:#FFFFFF;color:#1B1D22;font-size:15px;font-weight:700;padding:0 18px">Slow</button>
+        </div>
+        <span style="font-size:14px;color:#5C606B">{{ listenHint }}</span>
+      </sc-if>
+      <sc-if value="{{ isSpeak }}">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700;text-align:center;line-height:1.2;text-wrap:balance">{{ text }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ play }}" style="height:48px;border-radius:999px;border:none;background:#FFFFFF;color:#1B1D22;font-size:15px;font-weight:700;padding:0 16px">▶ Hear it</button>
+          <button onClick="{{ listen }}" style="height:48px;border-radius:999px;border:none;font-size:15px;font-weight:700;padding:0 18px;min-width:140px;background:{{ micBg }};color:#FFFFFF">{{ micLabel }}</button>
+        </div>
+      </sc-if>
+    </div>
+    <sc-if value="{{ isListen }}" hint-placeholder-val="{{ true }}">
+      <input value="{{ value }}" onChange="{{ onChange }}" onKeyDown="{{ onKey }}" readOnly="{{ judged }}" placeholder="Type what you hear" spellCheck="false" style="font-size:18px;padding:12px 14px;border-radius:14px;outline:none;background:{{ inBg }};border:2px solid {{ inBorder }};color:#1B1D22">
+    </sc-if>
+    <sc-if value="{{ judged }}">
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:15px;line-height:1.45">
+        <span style="font-weight:700;color:{{ resColor }}">{{ resLabel }}</span>
+        <span style="font-size:17px;font-weight:500">{{ text }}</span>
+        <sc-if value="{{ hasTrans }}"><span style="color:#5C606B">{{ translation }}</span></sc-if>
+      </div>
+    </sc-if>
+    <div style="display:flex;justify-content:flex-end;margin-top:auto;gap:8px">
+      <sc-if value="{{ canCheck }}"><button onClick="{{ check }}" style="background:oklch(0.5 0.11 85);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700">Check</button></sc-if>
+      <sc-if value="{{ judged }}"><button onClick="{{ next }}" style="background:#1B1D22;color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700">{{ nextLabel }}</button></sc-if>
+    </div>
+  </sc-if>
+  <sc-if value="{{ finished }}">
+    <div style="display:flex;align-items:center;gap:16px;background:oklch(0.97 0.02 85);border-radius:16px;padding:16px">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:44px;font-weight:700;line-height:1;color:oklch(0.42 0.1 85)">{{ score }}</span>
+      <span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <sc-for list="{{ review }}" as="r">
+        <div style="display:flex;justify-content:space-between;gap:12px;background:#F4F5F7;border-radius:12px;padding:10px 12px;font-size:15px">
+          <span style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:700">{{ r.text }}</span><span style="color:#5C606B">You: {{ r.yours }}</span></span>
+          <span style="font-size:13px;font-weight:700;white-space:nowrap;color:{{ r.color }}">{{ r.mark }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <button onClick="{{ restart }}" style="align-self:flex-start;background:oklch(0.95 0.04 85);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Go again</button>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:600,&quot;height&quot;:520},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Everyday phrases&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;items&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{text:string, lang?:string (BCP-47, e.g. 'es-ES'), translation?:string}[]&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;en-US&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const DEMO = [
+  { text: 'Where is the train station?', lang: 'en-GB', translation: 'Asking for directions' },
+  { text: 'I would like a coffee, please.', lang: 'en-GB' },
+  { text: 'It depends on the weather.', lang: 'en-GB', translation: '"depends on", not "depends of"' }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const clean = s => String(s || '').trim().toLowerCase().replace(/[.!?,;:"'’¿¡]/g, '').replace(/\s+/g, ' ');
+const strip = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const lev = (a, b) => { const d = [...Array(b.length + 1).keys()]; for (let i = 1; i <= a.length; i++) { let p = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, p + (a[i - 1] === b[j - 1] ? 0 : 1)); p = t; } } return d[b.length]; };
+const judge = (v, a) => { const x = clean(a), y = clean(v); if (!y) return 'wrong'; if (x === y) return 'right'; const d = lev(strip(x), strip(y)); return d <= Math.max(1, Math.round(x.length * 0.08)) ? 'close' : 'wrong'; };
+const LANGS = { en: 'English', es: 'Spanish', fr: 'French', de: 'German', it: 'Italian', pt: 'Portuguese', ja: 'Japanese', zh: 'Chinese', ko: 'Korean', ru: 'Russian' };
+
+class Component extends DCLogic {
+  state = { mode: 'listen', i: 0, val: '', judged: false, results: [], heard: '', rec: false };
+  items() { const p = parse(this.props.items); return Array.isArray(p) && p.length ? p : DEMO; }
+  lang(it) { return it.lang || this.props.lang || 'en-US'; }
+  srOK() { return typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+  componentWillUnmount() { try { speechSynthesis.cancel(); this.r && this.r.abort(); } catch (e) {} }
+  say(rate) {
+    const it = this.items()[this.state.i]; if (!it || !window.speechSynthesis) return;
+    speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(it.text); u.lang = this.lang(it); u.rate = rate; speechSynthesis.speak(u);
+  }
+  check = () => { const it = this.items()[this.state.i]; const input = this.state.mode === 'speak' ? this.state.heard : this.state.val; const r = judge(input, it.text); this.setState(s => ({ judged: true, results: [...s.results, { r, yours: input || '—' }] })); };
+  next = () => this.setState(s => ({ i: s.i + 1, val: '', heard: '', judged: false }));
+  listen = () => {
+    if (this.state.rec) { this.r && this.r.stop(); return; }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+    const it = this.items()[this.state.i]; const r = new SR(); this.r = r; r.lang = this.lang(it); r.interimResults = false;
+    r.onresult = e => { const heard = e.results[0][0].transcript; this.setState({ heard, rec: false }, this.check); };
+    r.onend = () => this.setState({ rec: false }); r.onerror = () => this.setState({ rec: false });
+    this.setState({ rec: true }); r.start();
+  };
+  renderVals() {
+    const I = this.items(), { mode, i, val, judged, results, rec, heard } = this.state, it = I[Math.min(i, I.length - 1)];
+    const done = i >= I.length, cur = results[i], sr = this.srOK();
+    const ok = results.filter(x => x.r !== 'wrong').length;
+    const code = (this.lang(it) || '').slice(0, 2);
+    const setMode = m => this.setState({ mode: m, i: 0, val: '', heard: '', judged: false, results: [] });
+    return {
+      title: this.props.title ?? 'Everyday phrases',
+      modes: [{ k: 'listen', label: 'Listen & type' }, { k: 'speak', label: 'Say it' }].map(m => ({ label: m.label, bg: mode === m.k ? '#FFFFFF' : 'transparent', color: mode === m.k ? '#1B1D22' : '#5C606B', opacity: m.k === 'speak' && !sr ? 0.4 : 1, onClick: () => (m.k !== 'speak' || sr) && setMode(m.k) })),
+      pct: (Math.min(results.length, I.length) / I.length) * 100 + '%',
+      active: !done, finished: done, isListen: mode === 'listen', isSpeak: mode === 'speak',
+      pos: `${Math.min(i + 1, I.length)} of ${I.length}`, langName: LANGS[code] || this.lang(it),
+      text: it.text, translation: it.translation || '', hasTrans: !!it.translation,
+      play: () => this.say(0.95), playSlow: () => this.say(0.6),
+      listenHint: 'Play as many times as you need.',
+      micBg: rec ? 'oklch(0.52 0.17 25)' : 'oklch(0.5 0.11 85)', micLabel: rec ? '● Listening… tap to stop' : '● Record',
+      value: val, onChange: e => this.setState({ val: e.target.value }), onKey: e => { if (e.key === 'Enter') judged ? this.next() : this.check(); },
+      judged, canCheck: !judged && mode === 'listen',
+      inBg: !judged ? '#F4F5F7' : cur && cur.r !== 'wrong' ? 'oklch(0.95 0.04 155)' : 'oklch(0.95 0.03 25)',
+      inBorder: !judged ? (val ? 'oklch(0.5 0.11 85)' : '#F4F5F7') : cur && cur.r !== 'wrong' ? 'oklch(0.48 0.13 155)' : 'oklch(0.52 0.17 25)',
+      resColor: cur && cur.r !== 'wrong' ? 'oklch(0.48 0.13 155)' : 'oklch(0.52 0.17 25)',
+      resLabel: !cur ? '' : mode === 'speak' ? (cur.r === 'wrong' ? `Heard: "${heard}"` : `Heard: "${heard}" ✓`) : cur.r === 'right' ? 'Correct' : cur.r === 'close' ? 'Almost — small spelling slip' : 'Not quite. It was:',
+      next: this.next, check: this.check, listen: this.listen, nextLabel: i === I.length - 1 ? 'See results' : 'Next',
+      score: `${ok}/${I.length}`, scoreLine: ok === I.length ? 'You caught every phrase.' : 'Replay the ones you missed and try again.',
+      review: I.map((x, k) => { const r = results[k] || { r: 'wrong', yours: '—' }; return { text: x.text, yours: r.yours, mark: r.r === 'wrong' ? 'Missed' : 'Correct', color: r.r === 'wrong' ? 'oklch(0.52 0.17 25)' : 'oklch(0.48 0.13 155)' }; }),
+      restart: () => setMode(mode)
+    };
+  }
+}
+</script>
+</body>
+</html>

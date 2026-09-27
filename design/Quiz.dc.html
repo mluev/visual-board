@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;min-height:460px;height:100%;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.55 0.16 45);border-radius:999px;padding:5px 12px">Quiz</span>
+    <sc-if value="{{ timed }}"><span style="font-size:14px;font-weight:700;color:oklch(0.42 0.14 45);background:oklch(0.96 0.03 45);border-radius:999px;padding:5px 12px;font-variant-numeric:tabular-nums">{{ timeStr }}</span></sc-if>
+  </div>
+  <div style="height:8px;background:oklch(0.95 0.03 45);border-radius:4px"><div style="height:8px;border-radius:4px;background:oklch(0.55 0.16 45);width:{{ barPct }};transition:width .4s linear"></div></div>
+  <sc-if value="{{ intro }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:700;line-height:1.1;letter-spacing:-.01em;text-wrap:balance">{{ title }}</div>
+      <p style="margin:0;font-size:16px;line-height:1.5;color:#5C606B;text-wrap:pretty">{{ introLine }}</p>
+      <sc-if value="{{ hasBest }}"><p style="margin:0;font-size:14px;font-weight:500;color:#3E424B">{{ bestLine }}</p></sc-if>
+      <button onClick="{{ start }}" style="align-self:flex-start;margin-top:4px;background:oklch(0.55 0.16 45);color:#FFFFFF;border:none;border-radius:999px;padding:13px 24px;font-size:16px;font-weight:700">Start quiz</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ run }}">
+    <div style="font-size:14px;font-weight:500;color:#5C606B">{{ qnum }}</div>
+    <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:23px;font-weight:500;line-height:1.3;text-wrap:pretty">{{ prompt }}</div>
+    <sc-if value="{{ hasCode }}"><pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.5;background:#F4F5F7;border-radius:12px;padding:12px 14px;white-space:pre-wrap">{{ code }}</pre></sc-if>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ options }}" as="o" hint-placeholder-count="4">
+        <button onClick="{{ o.onClick }}" style="display:flex;gap:12px;align-items:center;text-align:left;padding:10px 12px;border-radius:14px;font-size:16px;font-weight:500;background:{{ o.bg }};border:2px solid {{ o.border }};color:#1B1D22">
+          <span style="font-size:13px;font-weight:700;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:{{ o.lbg }};color:{{ o.lcolor }}">{{ o.letter }}</span><span>{{ o.text }}</span>
+        </button>
+      </sc-for>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;gap:8px">
+      <button onClick="{{ back }}" style="background:transparent;border:none;color:#5C606B;padding:12px 4px;font-size:15px;font-weight:700;opacity:{{ backOpacity }}">← Back</button>
+      <button onClick="{{ next }}" style="background:#1B1D22;color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700;opacity:{{ nextOpacity }}">{{ nextLabel }}</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ done }}">
+    <div style="display:flex;align-items:center;gap:16px;background:oklch(0.96 0.03 45);border-radius:16px;padding:16px">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:48px;font-weight:700;line-height:1;color:oklch(0.42 0.14 45)">{{ score }}</span>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span style="font-size:16px;font-weight:700">{{ verdict }}</span>
+        <span style="font-size:14px;color:#3E424B">{{ scoreLine }}</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ review }}" as="r" hint-placeholder-count="3">
+        <div style="background:#F4F5F7;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;gap:12px;font-size:15px"><span style="font-weight:700;text-wrap:pretty">{{ r.n }}. {{ r.prompt }}</span><span style="font-size:13px;font-weight:700;color:{{ r.markColor }};white-space:nowrap">{{ r.mark }}</span></div>
+          <div style="font-size:14px;color:#5C606B">You: {{ r.yours }}<sc-if value="{{ r.isWrong }}"> · Answer: {{ r.correct }}</sc-if></div>
+          <sc-if value="{{ r.hasExpl }}"><div style="font-size:14px;color:#3E424B;line-height:1.45;text-wrap:pretty">{{ r.expl }}</div></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <button onClick="{{ start }}" style="align-self:flex-start;background:oklch(0.96 0.03 45);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Retake</button>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:520,&quot;height&quot;:560},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Go basics: slices, goroutines, maps&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;description&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;questions&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{q:string, code?:string, options:string[], answer:number, explain?:string}[]&quot;},&quot;timeLimit&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:90,&quot;min&quot;:0,&quot;max&quot;:3600,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;},&quot;quizId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;intro&quot;,&quot;run&quot;,&quot;done&quot;],&quot;default&quot;:&quot;intro&quot;,&quot;tsType&quot;:&quot;'intro'|'run'|'done'&quot;}}">
+const DEMO = [
+  { q: 'What does this print?', code: 's := make([]int, 3, 10)\nfmt.Println(len(s))', options: ['0', '3', '10', '13'], answer: 1, explain: 'len is the number of elements (3). The 10 is the capacity, which cap(s) returns.' },
+  { q: 'Which keyword starts a goroutine?', options: ['async', 'spawn', 'go', 'defer'], answer: 2, explain: '`go f()` runs f in a new goroutine. defer delays a call until the function returns.' },
+  { q: 'What happens on the second line?', code: 'var m map[string]int\nm["a"] = 1', options: ['m becomes {a:1}', 'Compile error', 'Runtime panic', 'Nothing'], answer: 2, explain: 'A nil map can be read (you get zero values), but writing to it panics. Create it with make(map[string]int).' }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+const H = { sel: 'oklch(0.96 0.03 45)', selB: 'oklch(0.55 0.16 45)', ok: 'oklch(0.48 0.13 155)', bad: 'oklch(0.52 0.17 25)' };
+
+class Component extends DCLogic {
+  state = this.initState();
+
+  qs() { const q = parse(this.props.questions); return Array.isArray(q) && q.length ? q : DEMO; }
+  limit() { return this.props.timeLimit ?? 90; }
+  bestKey() { return this.props.quizId ? 'lk-quiz-' + this.props.quizId : null; }
+  initState() {
+    const qs = this.qs(), ini = this.props.initial, L = this.limit();
+    let best = null; const k = this.bestKey(); if (k) try { best = JSON.parse(localStorage.getItem(k)); } catch (e) {}
+    if (ini === 'run') return { phase: 'run', qi: 0, picks: [1], time: L, best };
+    if (ini === 'done') return { phase: 'done', qi: qs.length - 1, picks: qs.map((q, i) => i === 0 ? (q.answer + 1) % q.options.length : q.answer), time: Math.round(L * 0.55), best };
+    return { phase: 'intro', qi: 0, picks: [], time: L, best };
+  }
+  componentDidMount() {
+    this.t = setInterval(() => {
+      if (this.state.phase !== 'run' || !this.limit()) return;
+      const time = this.state.time - 1;
+      if (time <= 0) this.finish({ time: 0 }); else this.setState({ time });
+    }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+  finish(extra = {}) {
+    const s = { ...this.state, ...extra }, qs = this.qs();
+    const correct = qs.filter((q, i) => s.picks[i] === q.answer).length;
+    let best = s.best; const k = this.bestKey();
+    if (k && (!best || correct > best.correct)) { best = { correct, total: qs.length }; try { localStorage.setItem(k, JSON.stringify(best)); } catch (e) {} }
+    this.setState({ ...extra, phase: 'done', best });
+  }
+  start = () => this.setState({ phase: 'run', qi: 0, picks: [], time: this.limit() });
+  pick(i) { this.setState(s => { const p = [...s.picks]; p[s.qi] = i; return { picks: p }; }); }
+  next = () => { const { qi, picks } = this.state; if (picks[qi] == null) return; if (qi + 1 >= this.qs().length) this.finish(); else this.setState({ qi: qi + 1 }); };
+  back = () => this.setState(s => ({ qi: Math.max(0, s.qi - 1) }));
+
+  renderVals() {
+    const qs = this.qs(), { phase, qi, picks, time, best } = this.state, L = this.limit();
+    const Q = qs[Math.min(qi, qs.length - 1)], sel = picks[qi];
+    const correct = qs.filter((q, i) => picks[i] === q.answer).length;
+    const ratio = correct / qs.length;
+    return {
+      title: this.props.title ?? 'Go basics: slices, goroutines, maps',
+      introLine: this.props.description || `${qs.length} questions${L ? ' · ' + fmt(L) + ' time limit' : ''}. You'll see your score and a review of every answer at the end.`,
+      hasBest: !!best, bestLine: best ? `Best so far: ${best.correct}/${best.total}` : '',
+      timed: !!L, timeStr: fmt(time),
+      barPct: (phase === 'run' ? (L ? time / L : (qi + 1) / qs.length) : phase === 'done' ? (L ? time / L : 1) : 1) * 100 + '%',
+      intro: phase === 'intro', run: phase === 'run', done: phase === 'done',
+      qnum: `Question ${qi + 1} of ${qs.length}`, prompt: Q.q, code: Q.code || '', hasCode: !!Q.code,
+      options: Q.options.map((t, i) => {
+        const s = sel === i;
+        return { text: t, letter: 'ABCDEFGH'[i], onClick: () => this.pick(i), bg: s ? H.sel : '#F4F5F7', border: s ? H.selB : '#F4F5F7', lbg: s ? H.selB : '#FFFFFF', lcolor: s ? '#FFFFFF' : '#5C606B' };
+      }),
+      next: this.next, back: this.back, start: this.start,
+      nextLabel: qi === qs.length - 1 ? 'Finish' : 'Next', nextOpacity: sel == null ? 0.35 : 1, backOpacity: qi === 0 ? 0 : 1,
+      score: `${correct}/${qs.length}`,
+      verdict: ratio === 1 ? 'Perfect score' : ratio >= 0.7 ? 'Solid — review what you missed' : ratio >= 0.4 ? 'Getting there' : 'Worth another pass',
+      scoreLine: `${correct} of ${qs.length} correct${L ? ' · ' + fmt(L - time) + ' used' : ''}`,
+      review: qs.map((q, i) => {
+        const p = picks[i], ok = p === q.answer;
+        return { n: i + 1, prompt: q.q, yours: p == null ? 'No answer' : q.options[p], correct: q.options[q.answer], isWrong: !ok, expl: q.explain || '', hasExpl: !!q.explain, mark: ok ? 'Correct' : 'Incorrect', markColor: ok ? H.ok : H.bad };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

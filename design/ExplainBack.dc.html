@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button,textarea{font:inherit}button{cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.5 0.11 85);border-radius:999px;padding:5px 12px;flex-shrink:0">Explain it</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <span style="font-size:14px;font-weight:500;color:#5C606B;flex-shrink:0">{{ wordCount }}</span>
+  </div>
+  <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:500;line-height:1.3;text-wrap:pretty">{{ prompt }}</div>
+  <sc-if value="{{ writing }}" hint-placeholder-val="{{ true }}">
+    <textarea value="{{ text }}" onChange="{{ onText }}" placeholder="Write from memory, in your own words, as if teaching a friend. Don't look anything up." style="min-height:180px;resize:vertical;border:2px solid oklch(0.9 0.04 85);border-radius:14px;padding:14px;font-size:16px;line-height:1.55;outline:none;background:oklch(0.99 0.008 85);color:#1B1D22"></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+      <span style="font-size:14px;color:#5C606B">{{ pointsHint }}</span>
+      <button onClick="{{ submit }}" style="background:oklch(0.5 0.11 85);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700;opacity:{{ submitOp }}">Compare with key points</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ reviewing }}">
+    <div style="font-size:16px;line-height:1.55;color:#3E424B;background:#F4F5F7;border-radius:14px;padding:14px;white-space:pre-wrap;text-wrap:pretty">{{ text }}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-size:15px;font-weight:700">Did you cover these? Tick what you explained.</span>
+      <sc-if value="{{ canAI }}"><button onClick="{{ askAI }}" style="background:#1B1D22;color:#FFFFFF;border:none;border-radius:999px;padding:9px 16px;font-size:14px;font-weight:700;opacity:{{ aiOp }}">{{ aiLabel }}</button></sc-if>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ points }}" as="p" hint-placeholder-count="4">
+        <button onClick="{{ p.onClick }}" style="display:flex;gap:12px;align-items:flex-start;text-align:left;padding:10px 12px;border-radius:14px;font-size:16px;line-height:1.4;color:#1B1D22;background:{{ p.bg }};border:2px solid {{ p.border }}">
+          <span style="width:22px;height:22px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#FFFFFF;margin-top:1px;background:{{ p.boxBg }};border:2px solid {{ p.boxBorder }}">{{ p.check }}</span>
+          <span style="display:flex;flex-direction:column;gap:2px"><span>{{ p.text }}</span><sc-if value="{{ p.hasNote }}"><span style="font-size:14px;color:#5C606B">{{ p.note }}</span></sc-if></span>
+        </button>
+      </sc-for>
+    </div>
+    <sc-if value="{{ hasFeedback }}"><div style="font-size:15px;line-height:1.5;color:#3E424B;background:oklch(0.97 0.02 85);border-radius:14px;padding:12px 14px;text-wrap:pretty">{{ feedback }}</div></sc-if>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #ECEEF1;flex-wrap:wrap">
+      <div style="display:flex;align-items:baseline;gap:12px">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-weight:700;line-height:1;color:oklch(0.42 0.1 85)">{{ score }}</span>
+        <span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onClick="{{ edit }}" style="background:transparent;color:#1B1D22;border:2px solid oklch(0.9 0.04 85);border-radius:999px;padding:9px 16px;font-size:15px;font-weight:700">Edit my answer</button>
+        <button onClick="{{ reset }}" style="background:oklch(0.95 0.04 85);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Start over</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:620},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Teach it back&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;prompt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Explain why the seasons happen.&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;keyPoints&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(string | {point:string, keywords?:string[]})[]&quot;},&quot;explainId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;write&quot;,&quot;review&quot;],&quot;default&quot;:&quot;write&quot;,&quot;tsType&quot;:&quot;'write'|'review'&quot;}}">
+const DEMO_PROMPT = 'Explain why the seasons happen.';
+const DEMO_POINTS = [
+  { point: 'Earth\u2019s axis is tilted about 23.5°', keywords: ['tilt', 'axis', '23'] },
+  { point: 'The tilt stays pointed the same way as Earth orbits the Sun', keywords: ['same direction', 'orbit', 'fixed'] },
+  { point: 'The hemisphere tilted toward the Sun gets more direct light and longer days', keywords: ['direct', 'longer day', 'angle', 'toward'] },
+  { point: 'It is NOT caused by distance from the Sun', keywords: ['not distance', 'not because of distance', 'not how close', 'isn\u2019t distance'] }
+];
+const DEMO_ANSWER = 'The Earth is tilted on its axis, so as it goes around the Sun one half leans toward the Sun and gets sunlight more directly, and the days are longer. That half has summer.';
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const norm = p => typeof p === 'string' ? { point: p, keywords: [] } : p;
+
+class Component extends DCLogic {
+  state = this.initState();
+  points() { const p = parse(this.props.keyPoints); return (Array.isArray(p) && p.length ? p : DEMO_POINTS).map(norm); }
+  key() { return this.props.explainId ? 'lk-explain-' + this.props.explainId : null; }
+  initState() {
+    if (this.props.initial === 'review') return { text: DEMO_ANSWER, phase: 'review', ticks: this.autoTicks(DEMO_ANSWER), notes: {}, feedback: '', ai: 'idle' };
+    let text = ''; const k = this.key(); if (k) try { text = localStorage.getItem(k) || ''; } catch (e) {}
+    return { text, phase: 'write', ticks: [], notes: {}, feedback: '', ai: 'idle' };
+  }
+  autoTicks(t) { const s = t.toLowerCase(); return this.points().map((p, i) => (p.keywords || []).some(k => s.includes(k.toLowerCase())) ? i : -1).filter(i => i >= 0); }
+  onText = e => { const text = e.target.value; this.setState({ text }); const k = this.key(); if (k) try { localStorage.setItem(k, text); } catch (er) {} };
+  submit = () => { if (!this.state.text.trim()) return; this.setState(s => ({ phase: 'review', ticks: this.autoTicks(s.text), notes: {}, feedback: '', ai: 'idle' })); };
+  edit = () => this.setState({ phase: 'write' });
+  reset = () => { this.setState({ text: '', phase: 'write', ticks: [], notes: {}, feedback: '', ai: 'idle' }); const k = this.key(); if (k) try { localStorage.removeItem(k); } catch (e) {} };
+  askAI = async () => {
+    if (this.state.ai === 'busy') return;
+    this.setState({ ai: 'busy' });
+    const pts = this.points().map((p, i) => `${i}. ${p.point}`).join('\n');
+    const prompt = `A learner was asked: "${this.props.prompt ?? DEMO_PROMPT}"\nTheir answer:\n"""${this.state.text}"""\nKey points:\n${pts}\nReturn ONLY JSON: {"covered":[indices fully covered],"notes":{"index":"one short sentence on what is missing or wrong"},"feedback":"two sentences: what they did well and the most important thing to fix"}`;
+    try {
+      const raw = await window.claude.complete(prompt);
+      const j = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+      this.setState({ ticks: j.covered || [], notes: j.notes || {}, feedback: j.feedback || '', ai: 'done' });
+    } catch (e) { this.setState({ ai: 'idle', feedback: 'Couldn\u2019t get AI feedback. Tick the points yourself.' }); }
+  };
+  renderVals() {
+    const P = this.points(), { text, phase, ticks, notes, feedback, ai } = this.state;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0, got = ticks.length;
+    return {
+      title: this.props.title ?? 'Teach it back',
+      prompt: this.props.prompt ?? DEMO_PROMPT,
+      wordCount: `${words} words`,
+      writing: phase === 'write', reviewing: phase === 'review',
+      text, onText: this.onText, submit: this.submit, edit: this.edit, reset: this.reset,
+      submitOp: text.trim() ? 1 : 0.35,
+      pointsHint: `You'll compare it with ${P.length} key points.`,
+      canAI: typeof window !== 'undefined' && !!(window.claude && window.claude.complete),
+      askAI: this.askAI, aiOp: ai === 'busy' ? 0.5 : 1, aiLabel: ai === 'busy' ? 'Checking…' : ai === 'done' ? 'Check again with AI' : 'Check with AI',
+      points: P.map((p, i) => {
+        const on = ticks.includes(i);
+        return {
+          text: p.point, note: notes[i] || notes[String(i)] || '', hasNote: !!(notes[i] || notes[String(i)]),
+          check: on ? '✓' : '', bg: on ? 'oklch(0.95 0.04 155)' : '#F4F5F7', border: on ? 'oklch(0.48 0.13 155)' : '#F4F5F7',
+          boxBg: on ? 'oklch(0.48 0.13 155)' : '#FFFFFF', boxBorder: on ? 'oklch(0.48 0.13 155)' : '#C9CCD3',
+          onClick: () => this.setState(s => ({ ticks: s.ticks.includes(i) ? s.ticks.filter(x => x !== i) : [...s.ticks, i] }))
+        };
+      }),
+      hasFeedback: !!feedback, feedback,
+      score: `${got}/${P.length}`,
+      scoreLine: got === P.length ? 'You covered everything.' : `Add the unticked ${P.length - got === 1 ? 'point' : 'points'} and explain it again tomorrow.`
+    };
+  }
+}
+</script>
+</body>
+</html>

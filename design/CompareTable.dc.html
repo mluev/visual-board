@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Compare</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <sc-if value="{{ quiz }}"><span style="font-size:14px;font-weight:500;color:#5C606B">{{ revealLine }}</span></sc-if>
+      <button onClick="{{ toggleQuiz }}" style="border:none;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;background:{{ qBg }};color:{{ qColor }}">{{ qLabel }}</button>
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <div style="display:grid;min-width:{{ minW }};grid-template-columns:{{ cols }}">
+      <div></div>
+      <sc-for list="{{ heads }}" as="h" hint-placeholder-count="2">
+        <div onMouseEnter="{{ h.enter }}" onMouseLeave="{{ h.leave }}" style="padding:12px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;border-radius:14px 14px 0 0;transition:background .15s;background:{{ h.bg }}">{{ h.label }}</div>
+      </sc-for>
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+        <div style="padding:12px 14px 12px 0;font-size:14px;font-weight:700;color:#5C606B;border-top:1px solid #ECEEF1">{{ r.label }}</div>
+        <sc-for list="{{ r.cells }}" as="c">
+          <div onMouseEnter="{{ c.enter }}" onMouseLeave="{{ c.leave }}" onClick="{{ c.onClick }}" style="padding:12px 14px;font-size:16px;line-height:1.45;border-top:1px solid #ECEEF1;transition:background .15s;text-wrap:pretty;background:{{ c.bg }};cursor:{{ c.cursor }}">
+            <sc-if value="{{ c.shown }}"><span>{{ c.text }}</span></sc-if>
+            <sc-if value="{{ c.hidden }}"><span style="display:inline-block;padding:3px 10px;border-radius:8px;background:oklch(0.9 0.04 195);color:oklch(0.35 0.08 195);font-size:13px;font-weight:700">Recall, then tap</span></sc-if>
+          </div>
+        </sc-for>
+      </sc-for>
+    </div>
+  </div>
+  <sc-if value="{{ hasNote }}"><div style="font-size:15px;line-height:1.5;color:#3E424B;text-wrap:pretty">{{ note }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:480},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Mitosis vs meiosis&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;columns&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;rows&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{label:string, values:string[]}[]&quot;},&quot;note&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;table&quot;,&quot;quiz&quot;],&quot;default&quot;:&quot;table&quot;,&quot;tsType&quot;:&quot;'table'|'quiz'&quot;}}">
+const DEMO_COLS = ['Mitosis', 'Meiosis'];
+const DEMO_ROWS = [
+  { label: 'Purpose', values: ['Growth and repair', 'Making sex cells (gametes)'] },
+  { label: 'Divisions', values: ['1', '2'] },
+  { label: 'Daughter cells', values: ['2, identical', '4, all different'] },
+  { label: 'Chromosomes', values: ['Diploid (2n), same as the parent', 'Haploid (n), half the parent'] },
+  { label: 'Crossing over', values: ['No', 'Yes, in prophase I'] }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } } return v; };
+const T = 'oklch(0.97 0.02 195)';
+
+class Component extends DCLogic {
+  state = { hover: -1, quiz: this.props.initial === 'quiz', shown: [] };
+  renderVals() {
+    const demo = this.props.rows == null;
+    const C = demo ? DEMO_COLS : parse(this.props.columns) || [], R = demo ? DEMO_ROWS : parse(this.props.rows) || [];
+    const { hover, quiz, shown } = this.state;
+    const total = R.length * C.length;
+    const hov = i => ({ enter: () => this.setState({ hover: i }), leave: () => this.setState({ hover: -1 }) });
+    return {
+      title: this.props.title ?? 'Mitosis vs meiosis',
+      cols: `minmax(110px,0.7fr) repeat(${C.length}, minmax(160px,1fr))`, minW: 110 + C.length * 160 + 'px',
+      heads: C.map((label, i) => ({ label, bg: hover === i ? T : 'transparent', ...hov(i) })),
+      rows: R.map((r, ri) => ({
+        label: r.label,
+        cells: C.map((c, ci) => {
+          const key = ri + ':' + ci, open = !quiz || shown.includes(key);
+          return { text: r.values[ci] ?? '—', shown: open, hidden: !open, bg: hover === ci ? T : 'transparent', cursor: open ? 'default' : 'pointer', ...hov(ci), onClick: () => { if (!open) this.setState(s => ({ shown: [...s.shown, key] })); } };
+        })
+      })),
+      quiz, toggleQuiz: () => this.setState(s => ({ quiz: !s.quiz, shown: [] })),
+      qLabel: quiz ? 'Show all' : 'Quiz me', qBg: quiz ? '#F4F5F7' : 'oklch(0.52 0.12 195)', qColor: quiz ? '#1B1D22' : '#FFFFFF',
+      revealLine: `${shown.length} / ${total} revealed`,
+      note: this.props.note ?? (demo ? 'Tip: turn on Quiz me and try to recall each cell before you tap it.' : ''), hasNote: !!(this.props.note ?? demo)
+    };
+  }
+}
+</script>
+</body>
+</html>

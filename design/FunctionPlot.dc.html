@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}input[type=range]{width:100%}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Plot</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <sc-for list="{{ legend }}" as="l" hint-placeholder-count="1"><span style="display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500"><span style="width:14px;height:4px;border-radius:2px;background:{{ l.color }}"></span>{{ l.name }}</span></sc-for>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:16px;align-items:start">
+    <div onMouseMove="{{ onMove }}" onMouseLeave="{{ onLeave }}" style="position:relative;aspect-ratio:4 / 3;background:oklch(0.97 0.015 195);border-radius:16px;overflow:hidden;cursor:crosshair">
+      <sc-for list="{{ gridX }}" as="g"><div style="position:absolute;top:0;bottom:0;width:1px;left:{{ g.pos }};background:{{ g.color }}"></div></sc-for>
+      <sc-for list="{{ gridY }}" as="g"><div style="position:absolute;left:0;right:0;height:1px;top:{{ g.pos }};background:{{ g.color }}"></div></sc-for>
+      <sc-for list="{{ gridX }}" as="g"><span style="position:absolute;transform:translate(-50%,4px);font-size:11px;font-weight:500;color:#5C606B;font-variant-numeric:tabular-nums;left:{{ g.pos }};top:{{ g.labelAt }}">{{ g.label }}</span></sc-for>
+      <sc-for list="{{ gridY }}" as="g"><span style="position:absolute;transform:translate(-100%,-50%);padding-right:4px;font-size:11px;font-weight:500;color:#5C606B;font-variant-numeric:tabular-nums;top:{{ g.pos }};left:{{ g.labelAt }}">{{ g.label }}</span></sc-for>
+      <svg viewBox="0 0 1000 750" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
+        <sc-for list="{{ curves }}" as="c"><polyline points="{{ c.points }}" fill="none" stroke="{{ c.color }}" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline></sc-for>
+      </svg>
+      <sc-if value="{{ hovering }}">
+        <div style="position:absolute;top:0;bottom:0;width:1px;background:#1B1D22;opacity:.3;left:{{ hx }}"></div>
+        <sc-for list="{{ dots }}" as="d"><div style="position:absolute;width:12px;height:12px;border-radius:50%;border:3px solid #FFFFFF;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,.25);left:{{ d.left }};top:{{ d.top }};background:{{ d.color }}"></div></sc-for>
+      </sc-if>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;background:#F4F5F7;border-radius:12px;padding:12px 14px;line-height:1.4">{{ formula }}</div>
+      <sc-for list="{{ params }}" as="p" hint-placeholder-count="3">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-family:'JetBrains Mono',monospace;font-weight:500">{{ p.name }}</span><span style="font-weight:700;color:oklch(0.4 0.1 195);font-variant-numeric:tabular-nums">{{ p.value }}</span></div>
+          <input type="range" min="{{ p.min }}" max="{{ p.max }}" step="{{ p.step }}" value="{{ p.value }}" onChange="{{ p.onChange }}" style="accent-color:oklch(0.52 0.12 195)">
+        </div>
+      </sc-for>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#3E424B;min-height:20px">{{ readout }}</div>
+      <sc-if value="{{ hasNote }}"><div style="font-size:15px;line-height:1.5;color:#3E424B;text-wrap:pretty">{{ note }}</div></sc-if>
+      <button onClick="{{ reset }}" style="align-self:flex-start;border:none;border-radius:999px;background:#F4F5F7;padding:8px 14px;font-size:14px;font-weight:700;color:#1B1D22">Reset</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:820,&quot;height&quot;:520},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Transforming a parabola&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;fns&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{name:string, f:(x, p)=&gt;number, color?:string}[]&quot;},&quot;params&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{name:string, min:number, max:number, step?:number, value:number}[]&quot;},&quot;x&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;[min,max]&quot;},&quot;y&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;[min,max]&quot;},&quot;formula&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string | (p)=&gt;string&quot;},&quot;note&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string | (p)=&gt;string&quot;}}">
+const DEMO_PARAMS = [{ name: 'a', min: -3, max: 3, step: 0.1, value: 1 }, { name: 'h', min: -5, max: 5, step: 0.5, value: 0 }, { name: 'k', min: -5, max: 5, step: 0.5, value: 0 }];
+const DEMO_FNS = [{ name: 'y = a(x − h)² + k', f: (x, p) => p.a * (x - p.h) ** 2 + p.k }];
+const DEMO_FORMULA = p => `y = ${p.a}(x − ${p.h})² + ${p.k}`;
+const DEMO_NOTE = p => `Vertex at (${p.h}, ${p.k}). ${p.a > 0 ? 'Opens upward' : p.a < 0 ? 'Opens downward' : 'a = 0, so it\u2019s a flat line'}${Math.abs(p.a) > 1 ? ', narrower than y = x²' : Math.abs(p.a) < 1 && p.a !== 0 ? ', wider than y = x²' : ''}.`;
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } } return v; };
+const COLORS = ['oklch(0.52 0.12 195)', 'oklch(0.55 0.16 290)', 'oklch(0.58 0.16 45)'];
+const ticks = (lo, hi) => { const s0 = (hi - lo) / 6, m = Math.pow(10, Math.floor(Math.log10(s0))), f = s0 / m, st = (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * m, t = []; for (let v = Math.ceil(lo / st) * st; v <= hi + 1e-9; v += st) t.push(+v.toFixed(6)); return t; };
+const fmt = v => Math.abs(v) >= 100 ? Math.round(v) : +v.toFixed(2);
+
+class Component extends DCLogic {
+  demo() { return this.props.fns == null; }
+  pdefs() { return this.demo() ? DEMO_PARAMS : parse(this.props.params) || []; }
+  init() { return Object.fromEntries(this.pdefs().map(p => [p.name, p.value])); }
+  state = { p: this.init(), hx: null };
+  renderVals() {
+    const demo = this.demo(), fns = demo ? DEMO_FNS : this.props.fns || [], p = this.state.p;
+    const [x0, x1] = parse(this.props.x) || [-6, 6], [y0, y1] = parse(this.props.y) || [-6, 6];
+    const sx = x => (x - x0) / (x1 - x0), sy = y => 1 - (y - y0) / (y1 - y0);
+    const zeroX = Math.min(1, Math.max(0, sx(0))), zeroY = Math.min(1, Math.max(0, sy(0)));
+    const curves = fns.map((fn, i) => {
+      const pts = []; for (let k = 0; k <= 400; k++) { const x = x0 + (k / 400) * (x1 - x0); let y; try { y = fn.f(x, p); } catch (e) { y = NaN; } if (isFinite(y)) pts.push(`${(sx(x) * 1000).toFixed(1)},${(Math.max(-2, Math.min(3, sy(y))) * 750).toFixed(1)}`); }
+      return { points: pts.join(' '), color: fn.color || COLORS[i % 3] };
+    });
+    const hx = this.state.hx;
+    const formula = demo ? DEMO_FORMULA(p) : typeof this.props.formula === 'function' ? this.props.formula(p) : (this.props.formula ?? fns.map(f => f.name).join(',  '));
+    const noteSrc = demo ? DEMO_NOTE : this.props.note, note = typeof noteSrc === 'function' ? noteSrc(p) : (noteSrc || '');
+    return {
+      title: this.props.title ?? 'Transforming a parabola',
+      legend: fns.length > 1 ? fns.map((f, i) => ({ name: f.name, color: f.color || COLORS[i % 3] })) : [],
+      gridX: ticks(x0, x1).map(v => ({ pos: sx(v) * 100 + '%', label: v === 0 || v <= x0 || v >= x1 ? '' : String(v), color: v === 0 ? '#8A8F99' : 'oklch(0.91 0.02 195)', labelAt: `min(${zeroY * 100}%, calc(100% - 20px))` })),
+      gridY: ticks(y0, y1).map(v => ({ pos: sy(v) * 100 + '%', label: v <= y0 || v >= y1 ? '' : v === 0 ? '0' : String(v), color: v === 0 ? '#8A8F99' : 'oklch(0.91 0.02 195)', labelAt: `max(${zeroX * 100}%, 24px)` })),
+      curves,
+      onMove: e => { const r = e.currentTarget.getBoundingClientRect(); this.setState({ hx: x0 + ((e.clientX - r.left) / r.width) * (x1 - x0) }); },
+      onLeave: () => this.setState({ hx: null }),
+      hovering: hx != null, hx: hx != null ? sx(hx) * 100 + '%' : '0',
+      dots: hx != null ? fns.map((fn, i) => { const y = fn.f(hx, p); return isFinite(y) && y >= y0 && y <= y1 ? { left: sx(hx) * 100 + '%', top: sy(y) * 100 + '%', color: fn.color || COLORS[i % 3] } : null; }).filter(Boolean) : [],
+      readout: hx != null ? fns.map(fn => `x = ${fmt(hx)} → y = ${fmt(fn.f(hx, p))}`).join('   ') : 'Hover the plot to read values',
+      formula,
+      params: this.pdefs().map(d => ({ name: d.name, min: d.min, max: d.max, step: d.step ?? 0.1, value: p[d.name], onChange: e => { const v = +e.target.value; this.setState(s => ({ p: { ...s.p, [d.name]: v } })); } })),
+      hasNote: !!note, note,
+      reset: () => this.setState({ p: this.init() })
+    };
+  }
+}
+</script>
+</body>
+</html>

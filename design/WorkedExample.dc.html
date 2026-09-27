@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button,input{font:inherit}button{cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.5 0.11 85);border-radius:999px;padding:5px 12px;flex-shrink:0">Worked example</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <div style="display:flex;background:#F4F5F7;border-radius:999px;padding:4px;gap:2px">
+      <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+        <button onClick="{{ m.onClick }}" style="border:none;border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700;background:{{ m.bg }};color:{{ m.color }}">{{ m.label }}</button>
+      </sc-for>
+    </div>
+  </div>
+  <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:500;line-height:1.3;text-wrap:pretty">{{ problem }}</div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+      <div style="display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;align-items:start;padding:10px 12px;border-radius:14px;background:{{ s.bg }};border:2px solid {{ s.border }}">
+        <span style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:{{ s.numBg }};color:{{ s.numColor }}">{{ s.n }}</span>
+        <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+          <sc-if value="{{ s.shown }}"><span style="font-family:'JetBrains Mono',monospace;font-size:16px;line-height:1.5;white-space:pre-wrap">{{ s.work }}</span></sc-if>
+          <sc-if value="{{ s.hidden }}">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input value="{{ s.value }}" onChange="{{ s.onChange }}" readOnly="{{ s.locked }}" placeholder="Your step" spellCheck="false" style="flex:1;min-width:160px;font-family:'JetBrains Mono',monospace;font-size:16px;padding:7px 10px;border-radius:10px;border:2px solid #E2E4E9;outline:none;background:#FFFFFF;color:#1B1D22">
+              <sc-if value="{{ s.canHint }}"><button onClick="{{ s.onHint }}" style="border:none;border-radius:999px;background:#FFFFFF;padding:7px 12px;font-size:13px;font-weight:700;color:#3E424B">Hint</button></sc-if>
+            </div>
+            <sc-if value="{{ s.showAnswer }}"><span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;color:oklch(0.48 0.13 155)">{{ s.work }}</span></sc-if>
+          </sc-if>
+          <sc-if value="{{ s.showWhy }}"><span style="font-size:14px;line-height:1.45;color:#5C606B;text-wrap:pretty">{{ s.why }}</span></sc-if>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <sc-if value="{{ practicing }}">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #ECEEF1;flex-wrap:wrap">
+      <sc-if value="{{ checked }}">
+        <div style="display:flex;align-items:baseline;gap:12px">
+          <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-weight:700;line-height:1;color:oklch(0.42 0.1 85)">{{ score }}</span>
+          <span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span>
+        </div>
+        <button onClick="{{ reset }}" style="background:oklch(0.95 0.04 85);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Try again</button>
+      </sc-if>
+      <sc-if value="{{ unchecked }}">
+        <span style="font-size:15px;color:#5C606B">{{ fadeLine }}</span>
+        <button onClick="{{ check }}" style="background:oklch(0.5 0.11 85);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700">Check steps</button>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:560},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Solving a linear equation&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;problem&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Solve for x:  3(x − 2) + 4 = 19&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;steps&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{work:string, why?:string, accept?:string[]}[]&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;study&quot;,&quot;faded&quot;,&quot;solve&quot;],&quot;default&quot;:&quot;study&quot;,&quot;tsType&quot;:&quot;'study'|'faded'|'solve'&quot;}}">
+const DEMO_PROBLEM = 'Solve for x:  3(x − 2) + 4 = 19';
+const DEMO = [
+  { work: '3x − 6 + 4 = 19', why: 'Distribute the 3 across the bracket.' },
+  { work: '3x − 2 = 19', why: 'Combine the constants: −6 + 4 = −2.' },
+  { work: '3x = 21', why: 'Add 2 to both sides.' },
+  { work: 'x = 7', why: 'Divide both sides by 3. Check: 3(7 − 2) + 4 = 19 ✓' }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const canon = s => String(s || '').toLowerCase().replace(/[−–]/g, '-').replace(/[×·]/g, '*').replace(/\s+/g, '').replace(/[.;]$/, '');
+const MODES = [['study', 'Study'], ['faded', 'Faded'], ['solve', 'Solve']];
+
+class Component extends DCLogic {
+  state = { mode: this.props.initial ?? 'study', vals: {}, hints: [], checked: false };
+  steps() { const p = parse(this.props.steps); return Array.isArray(p) && p.length ? p : DEMO; }
+  hiddenSet(mode) {
+    const n = this.steps().length;
+    if (mode === 'study') return [];
+    if (mode === 'solve') return [...Array(n).keys()];
+    return [...Array(n).keys()].filter(i => i >= Math.ceil(n / 2));
+  }
+  setMode(mode) { this.setState({ mode, vals: {}, hints: [], checked: false }); }
+  ok(i) { const s = this.steps()[i], a = [s.work, ...(s.accept || [])]; return a.some(x => canon(x) === canon(this.state.vals[i])); }
+  renderVals() {
+    const S = this.steps(), { mode, vals, hints, checked } = this.state, hid = this.hiddenSet(mode);
+    const right = hid.filter(i => this.ok(i)).length;
+    return {
+      title: this.props.title ?? 'Solving a linear equation',
+      problem: this.props.problem ?? DEMO_PROBLEM,
+      modes: MODES.map(([k, label]) => ({ label, bg: mode === k ? '#FFFFFF' : 'transparent', color: mode === k ? '#1B1D22' : '#5C606B', onClick: () => this.setMode(k) })),
+      steps: S.map((s, i) => {
+        const h = hid.includes(i), good = checked && h && this.ok(i), bad = checked && h && !good;
+        return {
+          n: i + 1, work: s.work, why: s.why || '',
+          shown: !h, hidden: h, value: vals[i] || '', locked: checked,
+          onChange: e => { const v = e.target.value; this.setState(st => ({ vals: { ...st.vals, [i]: v } })); },
+          canHint: h && !checked && !!s.why && !hints.includes(i), onHint: () => this.setState(st => ({ hints: [...st.hints, i] })),
+          showWhy: !!s.why && (!h || hints.includes(i) || checked),
+          showAnswer: bad,
+          bg: good ? 'oklch(0.95 0.04 155)' : bad ? 'oklch(0.95 0.03 25)' : h ? 'oklch(0.97 0.02 85)' : '#F4F5F7',
+          border: good ? 'oklch(0.48 0.13 155)' : bad ? 'oklch(0.52 0.17 25)' : h ? 'oklch(0.88 0.05 85)' : '#F4F5F7',
+          numBg: h ? 'oklch(0.5 0.11 85)' : '#FFFFFF', numColor: h ? '#FFFFFF' : '#3E424B'
+        };
+      }),
+      practicing: mode !== 'study', checked, unchecked: !checked,
+      fadeLine: mode === 'faded' ? `First steps shown. Write the last ${hid.length}.` : 'Write every step yourself.',
+      check: () => this.setState({ checked: true }), reset: () => this.setState({ vals: {}, hints: [], checked: false }),
+      score: `${right}/${hid.length}`,
+      scoreLine: right === hid.length ? (mode === 'faded' ? 'Nice. Now try Solve.' : 'Solved on your own.') : 'Compare your steps with the ones shown in green.'
+    };
+  }
+}
+</script>
+</body>
+</html>

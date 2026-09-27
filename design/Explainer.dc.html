@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:14px;height:100%;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <span style="align-self:flex-start;font-size:13px;font-weight:700;color:#FFFFFF;background:#1B1D22;border-radius:999px;padding:5px 12px">{{ label }}</span>
+  <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700;line-height:1.15;letter-spacing:-.015em;text-wrap:balance">{{ title }}</div>
+  <sc-for list="{{ paras }}" as="p" hint-placeholder-count="2">
+    <p style="margin:0;font-size:17px;line-height:1.55;color:#3E424B;text-wrap:pretty;max-width:68ch">{{ p }}</p>
+  </sc-for>
+  <sc-if value="{{ hasCode }}"><pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.55;background:#F4F5F7;border-radius:12px;padding:14px 16px;white-space:pre-wrap">{{ code }}</pre></sc-if>
+  <sc-if value="{{ hasPoints }}">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ points }}" as="pt" hint-placeholder-count="3">
+        <div style="display:flex;gap:12px;align-items:baseline;background:#F4F5F7;border-radius:12px;padding:10px 14px">
+          <span style="font-size:13px;font-weight:700;color:#5C606B;font-variant-numeric:tabular-nums">{{ pt.n }}</span>
+          <span style="font-size:16px;line-height:1.45;text-wrap:pretty">{{ pt.text }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:520},&quot;label&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Explainer&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;What a slice really is&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;body&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;code&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;points&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;}}">
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return [v]; } } return v; };
+class Component extends DCLogic {
+  renderVals() {
+    const demo = !this.props.title && !this.props.body;
+    const body = demo ? 'A slice is a small header that points into an underlying array. It stores three things: a pointer, a length and a capacity.\n\nSlicing never copies data. Two slices can share the same array, so writing through one is visible through the other.' : (this.props.body ?? '');
+    const pts = demo ? ['len(s) is how many elements you can read.', 'cap(s) is how far the slice can grow before append reallocates.', 'append returns a new header — always reassign: s = append(s, x).'] : (parse(this.props.points) || []);
+    const code = demo ? 'a := [5]int{1, 2, 3, 4, 5}\ns := a[1:3]   // [2 3], len 2, cap 4' : (this.props.code ?? '');
+    return {
+      label: this.props.label ?? 'Explainer',
+      title: demo ? 'What a slice really is' : (this.props.title ?? ''),
+      paras: body.split(/\n\s*\n/).filter(Boolean),
+      code, hasCode: !!code,
+      points: pts.map((text, i) => ({ n: String(i + 1).padStart(2, '0'), text })), hasPoints: pts.length > 0
+    };
+  }
+}
+</script>
+</body>
+</html>

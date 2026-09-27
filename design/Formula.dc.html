@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button,input{font:inherit}button{cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;align-items:center;gap:12px;min-width:0">
+    <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Formula</span>
+    <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+  </div>
+  <div style="display:flex;justify-content:center;align-items:baseline;flex-wrap:wrap;gap:6px;background:oklch(0.97 0.015 195);border-radius:18px;padding:28px 16px;font-family:'Newsreader',serif;font-style:italic;font-size:54px;line-height:1.1">
+    <sc-for list="{{ parts }}" as="p" hint-placeholder-count="5">
+      <sc-if value="{{ p.plain }}"><span style="color:#5C606B;font-style:normal">{{ p.t }}</span></sc-if>
+      <sc-if value="{{ p.term }}"><button onMouseEnter="{{ p.onClick }}" onClick="{{ p.onClick }}" style="font:inherit;background:transparent;border:none;padding:0 4px;border-radius:10px;transition:color .15s,background .15s;color:{{ p.color }};box-shadow:inset 0 -4px 0 {{ p.under }}">{{ p.t }}</button></sc-if>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">
+    <sc-for list="{{ legend }}" as="l" hint-placeholder-count="3">
+      <button onClick="{{ l.onClick }}" style="display:flex;gap:12px;align-items:flex-start;text-align:left;padding:10px 12px;border-radius:14px;color:#1B1D22;background:{{ l.bg }};border:2px solid {{ l.border }}">
+        <span style="font-family:'Newsreader',serif;font-style:italic;font-size:26px;line-height:1;min-width:28px;color:{{ l.color }}">{{ l.t }}</span>
+        <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:700">{{ l.name }}</span><span style="font-size:14px;line-height:1.4;color:#3E424B;text-wrap:pretty">{{ l.note }}</span></span>
+      </button>
+    </sc-for>
+  </div>
+  <sc-if value="{{ hasCalc }}">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;padding-top:16px;border-top:1px solid #ECEEF1">
+      <span style="font-size:14px;font-weight:700;color:#5C606B;width:100%">Try it</span>
+      <sc-for list="{{ vars }}" as="v">
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500;color:#5C606B">
+          <span>{{ v.label }}</span>
+          <input type="number" value="{{ v.value }}" onChange="{{ v.onChange }}" style="width:110px;font-size:16px;padding:8px 10px;border-radius:10px;border:2px solid #E2E4E9;outline:none;color:#1B1D22">
+        </label>
+      </sc-for>
+      <span style="font-size:22px;color:#8A8F99;padding-bottom:8px">→</span>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span style="font-size:13px;font-weight:500;color:#5C606B">{{ resultLabel }}</span>
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700;color:oklch(0.4 0.1 195);font-variant-numeric:tabular-nums">{{ result }}</span>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:520},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Kinetic energy&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;parts&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{t:string, name?:string, note?:string}[] — parts with a name are explainable terms&quot;},&quot;calc&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{vars:{sym, label?, value}[], f:(vals)=&gt;number, label?:string}&quot;}}">
+const DEMO_PARTS = [
+  { t: 'KE', name: 'Kinetic energy', note: 'Energy an object has because it is moving. Measured in joules (J).' }, { t: '=' },
+  { t: '½', name: 'One half', note: 'Comes from integrating force over distance. Work = ∫ m·v dv = ½mv².' },
+  { t: 'm', name: 'Mass', note: 'In kilograms. Double the mass → double the energy.' },
+  { t: 'v²', name: 'Velocity squared', note: 'In m/s. Double the speed → four times the energy. That\u2019s why speed matters so much in crashes.' }
+];
+const DEMO_CALC = { vars: [{ sym: 'm', label: 'm (kg)', value: 1200 }, { sym: 'v', label: 'v (m/s)', value: 14 }], f: v => 0.5 * v.m * v.v * v.v, label: 'KE (joules)' };
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } } return v; };
+const HUES = [195, 290, 45, 250, 340, 130];
+
+class Component extends DCLogic {
+  demo() { return this.props.parts == null; }
+  calc() { return this.demo() ? DEMO_CALC : this.props.calc; }
+  state = { a: null, vals: Object.fromEntries(((this.calc() || {}).vars || []).map(v => [v.sym, v.value])) };
+  renderVals() {
+    const P = this.demo() ? DEMO_PARTS : parse(this.props.parts) || [], a = this.state.a, C = this.calc();
+    let ti = -1;
+    const terms = P.map(p => p.name ? ++ti : -1);
+    const col = i => `oklch(0.48 0.13 ${HUES[i % HUES.length]})`;
+    let res = '';
+    if (C) { try { const r = C.f(this.state.vals); res = isFinite(r) ? (Math.abs(r) >= 1e6 || (Math.abs(r) < 1e-3 && r !== 0) ? r.toExponential(3) : (+r.toFixed(3)).toLocaleString()) : '—'; } catch (e) { res = '—'; } }
+    return {
+      title: this.props.title ?? 'Kinetic energy',
+      parts: P.map((p, i) => ({ t: p.t, plain: !p.name, term: !!p.name, color: a == null || a === i ? col(terms[i]) : '#B5B9C1', under: a === i ? `oklch(0.85 0.08 ${HUES[terms[i] % HUES.length]})` : 'transparent', onClick: () => this.setState({ a: i }) })),
+      legend: P.map((p, i) => ({ p, i })).filter(x => x.p.name).map(({ p, i }) => ({
+        t: p.t, name: p.name, note: p.note || '', color: col(terms[i]), onClick: () => this.setState(s => ({ a: s.a === i ? null : i })),
+        bg: a === i ? `oklch(0.97 0.02 ${HUES[terms[i] % HUES.length]})` : '#F4F5F7', border: a === i ? col(terms[i]) : '#F4F5F7'
+      })),
+      hasCalc: !!C,
+      vars: C ? C.vars.map(v => ({ label: v.label || v.sym, value: this.state.vals[v.sym], onChange: e => { const x = e.target.value === '' ? 0 : +e.target.value; this.setState(s => ({ vals: { ...s.vals, [v.sym]: x } })); } })) : [],
+      resultLabel: C ? C.label || 'Result' : '', result: res
+    };
+  }
+}
+</script>
+</body>
+</html>

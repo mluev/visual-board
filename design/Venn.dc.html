@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Venn</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <div style="display:flex;background:#F4F5F7;border-radius:999px;padding:4px;gap:2px">
+      <button onClick="{{ setView }}" style="border:none;border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700;background:{{ vBg }};color:{{ vColor }}">View</button>
+      <button onClick="{{ setPractice }}" style="border:none;border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700;background:{{ pBg }};color:{{ pColor }}">Sort it yourself</button>
+    </div>
+  </div>
+  <sc-if value="{{ showPool }}">
+    <div style="display:flex;flex-direction:column;gap:8px;background:#F4F5F7;border-radius:14px;padding:12px">
+      <span style="font-size:14px;color:#5C606B">{{ poolHint }}</span>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <sc-for list="{{ pool }}" as="p"><button onClick="{{ p.onClick }}" style="border-radius:999px;padding:6px 12px;font-size:14px;font-weight:500;color:#1B1D22;background:{{ p.bg }};border:2px solid {{ p.border }}">{{ p.text }}</button></sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <div onClick="{{ onArea }}" style="position:relative;width:100%;aspect-ratio:100 / 62;border-radius:16px;background:#FCFCFD;border:1px solid #ECEEF1;overflow:hidden;cursor:{{ areaCursor }}">
+    <sc-for list="{{ circles }}" as="c" hint-placeholder-count="3">
+      <div style="position:absolute;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;transition:background .2s;left:{{ c.left }};top:{{ c.top }};width:{{ c.size }};height:{{ c.hSize }};background:{{ c.fill }};border:2px solid {{ c.stroke }}"></div>
+    </sc-for>
+    <sc-for list="{{ circles }}" as="c" hint-placeholder-count="3">
+      <span style="position:absolute;transform:translate(-50%,-50%);font-size:14px;font-weight:700;white-space:nowrap;pointer-events:none;left:{{ c.lx }};top:{{ c.ly }};color:{{ c.textColor }}">{{ c.name }}</span>
+    </sc-for>
+    <sc-for list="{{ regions }}" as="r">
+      <div style="position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:none;left:{{ r.left }};top:{{ r.top }}">
+        <sc-for list="{{ r.items }}" as="it"><span style="font-size:13px;font-weight:500;border-radius:999px;padding:2px 8px;white-space:nowrap;background:{{ it.bg }};color:#1B1D22;border:1.5px solid {{ it.border }}">{{ it.text }}</span></sc-for>
+      </div>
+    </sc-for>
+  </div>
+  <sc-if value="{{ inPractice }}">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+      <sc-if value="{{ checked }}">
+        <div style="display:flex;align-items:baseline;gap:12px"><span style="font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:700;line-height:1;color:oklch(0.4 0.1 195)">{{ score }}</span><span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span></div>
+        <button onClick="{{ retry }}" style="background:oklch(0.95 0.03 195);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Try again</button>
+      </sc-if>
+      <sc-if value="{{ unchecked }}">
+        <span style="font-size:15px;color:#5C606B">{{ leftLine }}</span>
+        <button onClick="{{ check }}" style="background:oklch(0.52 0.12 195);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700;opacity:{{ checkOp }}">Check</button>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:560},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Animal traits&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sets&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[] (2 or 3)&quot;},&quot;items&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{text:string, in:number[] (set indices; [] = none)}[]&quot;}}">
+const DEMO_SETS = ['Mammals', 'Can fly', 'Lives in water'];
+const DEMO_ITEMS = [{ text: 'Dog', in: [0] }, { text: 'Bat', in: [0, 1] }, { text: 'Whale', in: [0, 2] }, { text: 'Eagle', in: [1] }, { text: 'Duck', in: [1, 2] }, { text: 'Shark', in: [2] }, { text: 'Butterfly', in: [1] }];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } } return v; };
+const HUES = [195, 290, 45];
+const GEO = {
+  2: { c: [[38, 31], [62, 31]], r: 22, lab: [[24, 6], [76, 6]], reg: { '0': [27, 31], '1': [73, 31], '0,1': [50, 31], '': [8, 56] } },
+  3: { c: [[40, 24], [60, 24], [50, 40]], r: 18, lab: [[22, 5], [78, 5], [50, 60]], reg: { '0': [32, 18], '1': [68, 18], '2': [50, 50], '0,1': [50, 13], '0,2': [38, 37], '1,2': [62, 37], '0,1,2': [50, 29], '': [8, 56] } }
+};
+const key = a => [...a].sort().join(',');
+
+class Component extends DCLogic {
+  state = { mode: 'view', place: {}, sel: null, checked: false };
+  cfg() { return this.props.sets == null ? { sets: DEMO_SETS, items: DEMO_ITEMS } : { sets: parse(this.props.sets) || [], items: parse(this.props.items) || [] }; }
+  onArea = e => {
+    const { mode, sel, checked } = this.state; if (mode !== 'practice' || sel == null || checked) return;
+    const S = this.cfg().sets, G = GEO[S.length === 3 ? 3 : 2], r = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * 100, y = ((e.clientY - r.top) / r.width) * 100;
+    const inside = G.c.map((c, i) => Math.hypot(x - c[0], y - c[1]) <= G.r ? i : -1).filter(i => i >= 0);
+    this.setState(s => ({ place: { ...s.place, [sel]: key(inside) }, sel: null }));
+  };
+  renderVals() {
+    const { sets, items } = this.cfg(), n = sets.length === 3 ? 3 : 2, G = GEO[n], { mode, place, sel, checked } = this.state, pr = mode === 'practice';
+    const regs = {};
+    items.forEach((it, i) => { const k = pr ? place[i] : key(it.in); if (k == null) return; (regs[k] = regs[k] || []).push({ it, i }); });
+    const right = items.filter((it, i) => place[i] === key(it.in)).length, left = items.filter((_, i) => place[i] == null).length;
+    const tab = (on) => ({ bg: on ? '#FFFFFF' : 'transparent', color: on ? '#1B1D22' : '#5C606B' });
+    return {
+      title: this.props.title ?? 'Animal traits',
+      setView: () => this.setState({ mode: 'view' }), setPractice: () => this.setState({ mode: 'practice', place: {}, sel: 0, checked: false }),
+      vBg: tab(!pr).bg, vColor: tab(!pr).color, pBg: tab(pr).bg, pColor: tab(pr).color,
+      circles: sets.slice(0, n).map((name, i) => ({ name, left: G.c[i][0] + '%', top: (G.c[i][1] / 62) * 100 + '%', size: G.r * 2 + '%', hSize: (G.r * 2 / 62) * 100 + '%', fill: `oklch(0.7 0.1 ${HUES[i]} / .16)`, stroke: `oklch(0.6 0.1 ${HUES[i]})`, lx: G.lab[i][0] + '%', ly: (G.lab[i][1] / 62) * 100 + '%', textColor: `oklch(0.42 0.1 ${HUES[i]})` })),
+      regions: Object.entries(regs).map(([k, list]) => { const p = G.reg[k] || G.reg['']; return { left: p[0] + '%', top: (p[1] / 62) * 100 + '%', items: list.map(({ it, i }) => { const ok = place[i] === key(it.in); return { text: it.text, bg: pr && checked ? (ok ? 'oklch(0.95 0.04 155)' : 'oklch(0.95 0.03 25)') : '#FFFFFF', border: pr && checked ? (ok ? 'oklch(0.48 0.13 155)' : 'oklch(0.52 0.17 25)') : '#D5D8DE' }; }) }; }),
+      showPool: pr && !checked && left > 0,
+      poolHint: sel != null ? `Click where "${items[sel].text}" belongs in the diagram (outside every circle = none).` : 'Pick an item.',
+      pool: items.map((it, i) => ({ it, i })).filter(x => place[x.i] == null).map(({ it, i }) => ({ text: it.text, bg: sel === i ? 'oklch(0.95 0.03 195)' : '#FFFFFF', border: sel === i ? 'oklch(0.52 0.12 195)' : '#E2E4E9', onClick: () => this.setState({ sel: i }) })),
+      onArea: this.onArea, areaCursor: pr && sel != null ? 'crosshair' : 'default',
+      inPractice: pr, checked, unchecked: !checked,
+      leftLine: left ? `${left} left to place` : 'All placed', checkOp: left ? 0.35 : 1,
+      check: () => { if (!left) this.setState({ checked: true }); },
+      retry: () => this.setState({ place: {}, sel: 0, checked: false }),
+      score: `${right}/${items.length}`, scoreLine: right === items.length ? 'All in the right region.' : 'Items in red are in the wrong region. Switch to View to see where they belong.'
+    };
+  }
+}
+</script>
+</body>
+</html>

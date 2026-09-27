@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button,input{font:inherit}button{cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.5 0.11 85);border-radius:999px;padding:5px 12px;flex-shrink:0">Type it</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <span style="font-size:14px;font-weight:500;color:#5C606B;flex-shrink:0">{{ countLabel }}</span>
+  </div>
+  <sc-for list="{{ items }}" as="it" hint-placeholder-count="3">
+    <div style="display:flex;flex-direction:column;gap:8px;padding-top:14px;border-top:1px solid #ECEEF1">
+      <div style="display:flex;gap:10px;align-items:baseline">
+        <span style="font-size:14px;font-weight:700;color:oklch(0.42 0.1 85)">{{ it.n }}</span>
+        <span style="font-size:17px;font-weight:500;line-height:1.4;text-wrap:pretty">{{ it.q }}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input value="{{ it.value }}" onChange="{{ it.onChange }}" onKeyDown="{{ it.onKey }}" readOnly="{{ it.locked }}" placeholder="Type your answer" spellCheck="false" style="flex:1;min-width:200px;font-size:16px;padding:10px 12px;border-radius:12px;outline:none;background:{{ it.bg }};border:2px solid {{ it.border }};color:#1B1D22">
+        <sc-if value="{{ it.canHint }}"><button onClick="{{ it.toggleHint }}" style="border:none;border-radius:999px;background:#F4F5F7;padding:9px 14px;font-size:14px;font-weight:700;color:#3E424B">Hint</button></sc-if>
+      </div>
+      <sc-if value="{{ it.showHint }}"><div style="font-size:14px;color:#5C606B">Hint: {{ it.hint }}</div></sc-if>
+      <sc-if value="{{ it.showRes }}">
+        <div style="display:flex;flex-direction:column;gap:2px;font-size:15px;line-height:1.45">
+          <span style="font-weight:700;color:{{ it.resColor }}">{{ it.resLabel }}</span>
+          <sc-if value="{{ it.hasExpl }}"><span style="color:#3E424B;text-wrap:pretty">{{ it.explain }}</span></sc-if>
+        </div>
+      </sc-if>
+    </div>
+  </sc-for>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #ECEEF1;flex-wrap:wrap">
+    <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:baseline;gap:12px">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-weight:700;line-height:1;color:oklch(0.42 0.1 85)">{{ score }}</span>
+        <span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span>
+      </div>
+      <button onClick="{{ reset }}" style="background:oklch(0.95 0.04 85);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Try again</button>
+    </sc-if>
+    <sc-if value="{{ open }}" hint-placeholder-val="{{ true }}">
+      <span style="font-size:15px;color:#5C606B">{{ filledLine }}</span>
+      <button onClick="{{ submit }}" style="background:oklch(0.5 0.11 85);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700">Check answers</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:620,&quot;height&quot;:560},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Recall from memory&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;questions&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{q:string, answer:string|string[], hint?:string, explain?:string}[]&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;blank&quot;,&quot;submitted&quot;],&quot;default&quot;:&quot;blank&quot;,&quot;tsType&quot;:&quot;'blank'|'submitted'&quot;}}">
+const DEMO = [
+  { q: 'Past tense of "go"?', answer: 'went', hint: 'Irregular — it doesn\u2019t end in -ed.', explain: 'go → went → gone. One of the most common irregular verbs.' },
+  { q: 'What is 7 × 8?', answer: '56', explain: '7 × 8 = 56. A trick: 5, 6, 7, 8 → 56 = 7 × 8.' },
+  { q: 'Capital of Australia?', answer: ['Canberra'], hint: 'Not Sydney.', explain: 'Canberra was purpose-built as a compromise between Sydney and Melbourne.' }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const clean = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.!?,;:"'’]/g, '');
+const strip = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const lev = (a, b) => { const d = [...Array(b.length + 1).keys()]; for (let i = 1; i <= a.length; i++) { let p = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, p + (a[i - 1] === b[j - 1] ? 0 : 1)); p = t; } } return d[b.length]; };
+const judge = (v, ans) => { const c = clean(v); if (!c) return 'wrong'; if (ans.some(a => clean(a) === c)) return 'right'; if (ans.some(a => { const x = strip(clean(a)), y = strip(c); return x === y || (x.length > 3 && lev(x, y) <= (x.length > 6 ? 2 : 1)); })) return 'close'; return 'wrong'; };
+const arr = a => Array.isArray(a) ? a : [a];
+
+class Component extends DCLogic {
+  state = this.initState();
+  qs() { const q = parse(this.props.questions); return Array.isArray(q) && q.length ? q : DEMO; }
+  initState() { const qs = this.qs(); return this.props.initial === 'submitted' ? { vals: ['goed', '56', 'Canbera'].slice(0, qs.length), hints: [], submitted: true } : { vals: qs.map(() => ''), hints: [], submitted: false }; }
+  set(i, v) { this.setState(s => { const vals = [...s.vals]; vals[i] = v; return { vals }; }); }
+  submit = () => this.setState({ submitted: true });
+  reset = () => this.setState({ vals: this.qs().map(() => ''), hints: [], submitted: false });
+  renderVals() {
+    const qs = this.qs(), { vals, hints, submitted } = this.state;
+    const res = qs.map((q, i) => judge(vals[i], arr(q.answer)));
+    const correct = res.filter(r => r !== 'wrong').length;
+    const C = { ok: 'oklch(0.48 0.13 155)', okBg: 'oklch(0.95 0.04 155)', bad: 'oklch(0.52 0.17 25)', badBg: 'oklch(0.95 0.03 25)' };
+    return {
+      title: this.props.title ?? 'Recall from memory',
+      countLabel: `${qs.length} questions`,
+      items: qs.map((q, i) => {
+        const r = res[i], a = arr(q.answer)[0];
+        return {
+          n: i + 1, q: q.q, value: vals[i] || '', locked: submitted,
+          onChange: e => this.set(i, e.target.value),
+          onKey: e => { if (e.key === 'Enter' && !submitted) { const nx = e.currentTarget.closest('[data-sa]'); this.submit(); } },
+          canHint: !!q.hint && !submitted, showHint: !!q.hint && hints.includes(i) && !submitted, hint: q.hint || '',
+          toggleHint: () => this.setState(s => ({ hints: s.hints.includes(i) ? s.hints.filter(x => x !== i) : [...s.hints, i] })),
+          bg: !submitted ? '#F4F5F7' : r === 'wrong' ? C.badBg : C.okBg,
+          border: !submitted ? (vals[i] ? 'oklch(0.5 0.11 85)' : '#F4F5F7') : r === 'wrong' ? C.bad : C.ok,
+          showRes: submitted, resColor: r === 'wrong' ? C.bad : C.ok,
+          resLabel: r === 'right' ? 'Correct' : r === 'close' ? `Almost — the spelling is "${a}"` : `Answer: ${a}`,
+          explain: q.explain || '', hasExpl: !!q.explain
+        };
+      }),
+      submitted, open: !submitted, submit: this.submit, reset: this.reset,
+      filledLine: `${vals.filter(Boolean).length} of ${qs.length} answered`,
+      score: `${correct}/${qs.length}`,
+      scoreLine: correct === qs.length ? 'All recalled.' : `${qs.length - correct} to review above.`
+    };
+  }
+}
+</script>
+</body>
+</html>

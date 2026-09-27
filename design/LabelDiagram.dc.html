@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.5 0.11 85);border-radius:999px;padding:5px 12px;flex-shrink:0">Label it</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <span style="font-size:14px;font-weight:500;color:#5C606B;flex-shrink:0">{{ progress }}</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px;align-items:start">
+    <div style="position:relative;border-radius:16px;overflow:hidden;background:#F4F5F7;aspect-ratio:{{ aspect }}">
+      <sc-if value="{{ hasImage }}"><img src="{{ image }}" alt="{{ title }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain"></sc-if>
+      <sc-if value="{{ noImage }}"><image-slot id="{{ slotId }}" shape="rect" fit="contain" placeholder="{{ placeholder }}" style="position:absolute;inset:0;width:100%;height:100%"></image-slot></sc-if>
+      <sc-for list="{{ pins }}" as="p" hint-placeholder-count="4">
+        <button onClick="{{ p.onClick }}" style="position:absolute;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:transform .15s;left:{{ p.left }};top:{{ p.top }};background:{{ p.bg }};color:{{ p.color }};border:3px solid {{ p.ring }}">{{ p.n }}</button>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:14px;color:#5C606B">{{ instruction }}</span>
+      <sc-if value="{{ open }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <sc-for list="{{ bank }}" as="b" hint-placeholder-count="4">
+            <button onClick="{{ b.onClick }}" style="border-radius:999px;padding:7px 12px;font-size:14px;font-weight:500;color:#1B1D22;background:{{ b.bg }};border:2px solid {{ b.border }};opacity:{{ b.opacity }}">{{ b.text }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <sc-for list="{{ legend }}" as="l" hint-placeholder-count="4">
+          <button onClick="{{ l.onClick }}" style="display:flex;gap:10px;align-items:center;text-align:left;padding:8px 10px;border-radius:12px;font-size:15px;background:{{ l.bg }};border:2px solid {{ l.border }};color:#1B1D22">
+            <span style="width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#1B1D22;color:#FFFFFF">{{ l.n }}</span>
+            <span style="flex:1;font-weight:500;color:{{ l.textColor }}">{{ l.text }}</span>
+            <sc-if value="{{ l.showFix }}"><span style="font-size:13px;font-weight:700;color:oklch(0.48 0.13 155)">{{ l.fix }}</span></sc-if>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #ECEEF1;flex-wrap:wrap">
+    <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:baseline;gap:12px">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-weight:700;line-height:1;color:oklch(0.42 0.1 85)">{{ score }}</span>
+        <span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span>
+      </div>
+      <button onClick="{{ reset }}" style="background:oklch(0.95 0.04 85);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Try again</button>
+    </sc-if>
+    <sc-if value="{{ open }}" hint-placeholder-val="{{ true }}">
+      <span style="font-size:15px;color:#5C606B">{{ leftLine }}</span>
+      <button onClick="{{ submit }}" style="background:oklch(0.5 0.11 85);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700;opacity:{{ submitOp }}">Check labels</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:560},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Parts of a plant cell&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;image&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string (url) — omit to show a drop slot&quot;},&quot;slotId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;label-diagram-demo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;placeholder&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;aspect&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;4 / 3&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;pins&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{x:number(%), y:number(%), label:string}[]&quot;},&quot;distractors&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;blank&quot;,&quot;submitted&quot;],&quot;default&quot;:&quot;blank&quot;,&quot;tsType&quot;:&quot;'blank'|'submitted'&quot;}}">
+const DEMO = [
+  { x: 12, y: 30, label: 'Cell wall' }, { x: 48, y: 46, label: 'Nucleus' }, { x: 72, y: 28, label: 'Chloroplast' }, { x: 60, y: 72, label: 'Vacuole' }, { x: 26, y: 70, label: 'Mitochondrion' }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const A = 'oklch(0.5 0.11 85)';
+
+class Component extends DCLogic {
+  state = this.initState();
+  pins() { const p = parse(this.props.pins); return Array.isArray(p) && p.length ? p : DEMO; }
+  initState() {
+    const P = this.pins();
+    if (this.props.initial === 'submitted') return { assign: P.map((p, i) => i === 3 ? P[4].label : i === 4 ? P[3].label : p.label), sel: null, submitted: true };
+    return { assign: P.map(() => null), sel: 0, submitted: false };
+  }
+  give(label) {
+    const { sel, assign, submitted } = this.state; if (submitted || sel == null) return;
+    const a = assign.map(x => x === label ? null : x); a[sel] = label;
+    const next = a.findIndex(x => x == null);
+    this.setState({ assign: a, sel: next >= 0 ? next : null });
+  }
+  renderVals() {
+    const P = this.pins(), { assign, sel, submitted } = this.state;
+    const labels = [...new Set([...P.map(p => p.label), ...(parse(this.props.distractors) || [])])].sort((a, b) => a.localeCompare(b));
+    const correct = P.filter((p, i) => assign[i] === p.label).length, left = assign.filter(a => a == null).length;
+    const pick = i => { if (!submitted) this.setState({ sel: i }); };
+    return {
+      title: this.props.title ?? 'Parts of a plant cell',
+      progress: `${P.length - left} / ${P.length} labeled`,
+      image: this.props.image || '', hasImage: !!this.props.image, noImage: !this.props.image,
+      slotId: this.props.slotId ?? 'label-diagram-demo',
+      placeholder: this.props.placeholder ?? 'Drop a diagram image (e.g. a plant cell)',
+      aspect: this.props.aspect ?? '4 / 3',
+      instruction: submitted ? 'Results' : sel != null ? `Choose the label for pin ${sel + 1}.` : 'Click a pin to change its label.',
+      pins: P.map((p, i) => {
+        const ok = assign[i] === p.label;
+        const bg = submitted ? (ok ? 'oklch(0.48 0.13 155)' : 'oklch(0.52 0.17 25)') : sel === i ? A : assign[i] ? '#1B1D22' : '#FFFFFF';
+        return { n: i + 1, left: p.x + '%', top: p.y + '%', bg, color: bg === '#FFFFFF' ? '#1B1D22' : '#FFFFFF', ring: sel === i && !submitted ? '#FFFFFF' : bg === '#FFFFFF' ? '#1B1D22' : '#FFFFFF', onClick: () => pick(i) };
+      }),
+      bank: labels.map(t => { const used = assign.includes(t); return { text: t, bg: used ? '#F4F5F7' : '#FFFFFF', border: used ? '#F4F5F7' : '#E2E4E9', opacity: used ? 0.5 : 1, onClick: () => this.give(t) }; }),
+      legend: P.map((p, i) => {
+        const ok = assign[i] === p.label, s = sel === i && !submitted;
+        return {
+          n: i + 1, text: assign[i] ?? '—', textColor: assign[i] ? '#1B1D22' : '#8A8F99', onClick: () => pick(i),
+          bg: submitted ? (ok ? 'oklch(0.95 0.04 155)' : 'oklch(0.95 0.03 25)') : s ? 'oklch(0.95 0.04 85)' : '#F4F5F7',
+          border: submitted ? (ok ? 'oklch(0.48 0.13 155)' : 'oklch(0.52 0.17 25)') : s ? A : '#F4F5F7',
+          showFix: submitted && !ok, fix: p.label
+        };
+      }),
+      submitted, open: !submitted,
+      submit: () => { if (!left) this.setState({ submitted: true, sel: null }); },
+      reset: () => this.setState({ assign: P.map(() => null), sel: 0, submitted: false }),
+      leftLine: left ? `${left} left` : 'All labeled', submitOp: left ? 0.35 : 1,
+      score: `${correct}/${P.length}`,
+      scoreLine: correct === P.length ? 'Every label is right.' : 'The correct labels are shown in green.'
+    };
+  }
+}
+</script>
+</body>
+</html>

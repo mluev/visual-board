@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button,input{font:inherit}button{cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:18px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.5 0.11 85);border-radius:999px;padding:5px 12px;flex-shrink:0">Fill in</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <span style="font-size:14px;font-weight:500;color:#5C606B;flex-shrink:0">{{ countLabel }}</span>
+  </div>
+  <sc-if value="{{ hasBank }}">
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <sc-for list="{{ bank }}" as="w" hint-placeholder-count="4">
+        <button onClick="{{ w.onClick }}" style="border:none;border-radius:999px;padding:7px 14px;font-size:15px;font-weight:500;background:oklch(0.95 0.04 85);color:#1B1D22;opacity:{{ w.opacity }}">{{ w.text }}</button>
+      </sc-for>
+    </div>
+  </sc-if>
+  <div onKeyDown="{{ onKey }}" style="font-size:18px;line-height:2.2;color:#1B1D22;text-wrap:pretty;font-family:{{ font }}">
+    <sc-for list="{{ segs }}" as="s" hint-placeholder-count="3">
+      <sc-if value="{{ s.isText }}"><span style="white-space:pre-wrap">{{ s.text }}</span></sc-if>
+      <sc-if value="{{ s.isBlank }}"><span style="display:inline-flex;align-items:baseline;gap:6px"><input value="{{ s.value }}" onChange="{{ s.onChange }}" readOnly="{{ s.locked }}" spellCheck="false" style="font-size:17px;padding:3px 8px;border-radius:8px;outline:none;text-align:center;width:{{ s.w }};background:{{ s.bg }};border:2px solid {{ s.border }};color:#1B1D22;font-family:inherit"><sc-if value="{{ s.showFix }}"><span style="font-size:15px;font-weight:700;color:oklch(0.48 0.13 155)">{{ s.fix }}</span></sc-if></span></sc-if>
+    </sc-for>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #ECEEF1;flex-wrap:wrap">
+    <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:baseline;gap:12px">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-weight:700;line-height:1;color:oklch(0.42 0.1 85)">{{ score }}</span>
+        <span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span>
+      </div>
+      <button onClick="{{ reset }}" style="background:oklch(0.95 0.04 85);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Try again</button>
+    </sc-if>
+    <sc-if value="{{ open }}" hint-placeholder-val="{{ true }}">
+      <span style="font-size:15px;color:#5C606B">{{ filledLine }}</span>
+      <button onClick="{{ submit }}" style="background:oklch(0.5 0.11 85);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700">Check</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:400},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;How plants make food&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;text&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string — wrap blanks in [answer] or [answer|alt]&quot;},&quot;bank&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;mono&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;blank&quot;,&quot;submitted&quot;],&quot;default&quot;:&quot;blank&quot;,&quot;tsType&quot;:&quot;'blank'|'submitted'&quot;}}">
+const DEMO = 'Photosynthesis turns light energy into chemical energy. It happens in the [chloroplasts], using a green pigment called [chlorophyll]. The plant takes in water and [carbon dioxide|CO2] and releases [oxygen] as a by-product.';
+const clean = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.!?,;:"'’]/g, '');
+const strip = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const lev = (a, b) => { const d = [...Array(b.length + 1).keys()]; for (let i = 1; i <= a.length; i++) { let p = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, p + (a[i - 1] === b[j - 1] ? 0 : 1)); p = t; } } return d[b.length]; };
+const judge = (v, ans) => { const c = clean(v); if (!c) return 'wrong'; if (ans.some(a => clean(a) === c)) return 'right'; if (ans.some(a => { const x = strip(clean(a)), y = strip(c); return x === y || lev(x, y) <= (x.length > 6 ? 2 : 1); })) return 'close'; return 'wrong'; };
+
+class Component extends DCLogic {
+  state = this.initState();
+  parsed() {
+    const src = this.props.text || DEMO, segs = [], re = /\[([^\]]+)\]/g; let m, last = 0, bi = 0;
+    while ((m = re.exec(src))) { if (m.index > last) segs.push({ t: src.slice(last, m.index) }); segs.push({ b: bi++, ans: m[1].split('|').map(s => s.trim()) }); last = re.lastIndex; }
+    if (last < src.length) segs.push({ t: src.slice(last) });
+    return segs;
+  }
+  blanks() { return this.parsed().filter(s => s.ans); }
+  initState() { const b = this.blanks(); return this.props.initial === 'submitted' ? { vals: b.map((x, i) => i === 1 ? 'clorophyl' : i === 2 ? 'nitrogen' : x.ans[0]), submitted: true } : { vals: b.map(() => ''), submitted: false }; }
+  set(i, v) { this.setState(s => { const vals = [...s.vals]; vals[i] = v; return { vals }; }); }
+  submit = () => this.setState({ submitted: true });
+  reset = () => this.setState({ vals: this.blanks().map(() => ''), submitted: false });
+  onKey = e => { if (e.key === 'Enter' && !this.state.submitted) this.submit(); };
+  renderVals() {
+    const segs = this.parsed(), blanks = this.blanks(), { vals, submitted } = this.state;
+    const res = blanks.map((b, i) => judge(vals[i], b.ans));
+    const correct = res.filter(r => r !== 'wrong').length, close = res.filter(r => r === 'close').length;
+    const bankOn = this.props.bank ?? true;
+    const words = blanks.map(b => b.ans[0]).sort((a, b) => a.localeCompare(b));
+    return {
+      title: this.props.title ?? 'How plants make food',
+      countLabel: `${blanks.length} blanks`,
+      font: this.props.mono ? "'JetBrains Mono',monospace" : "'DM Sans',sans-serif",
+      hasBank: bankOn && !submitted,
+      bank: words.map(w => ({ text: w, opacity: vals.some(v => clean(v) === clean(w)) ? 0.35 : 1, onClick: () => { const i = vals.findIndex(v => !v); if (i >= 0) this.set(i, w); } })),
+      segs: segs.map(s => {
+        if (!s.ans) return { isText: true, isBlank: false, text: s.t };
+        const i = s.b, r = res[i], w = Math.max(...s.ans.map(a => a.length), 4) + 3 + 'ch';
+        const bg = !submitted ? 'oklch(0.97 0.02 85)' : r === 'wrong' ? 'oklch(0.95 0.03 25)' : 'oklch(0.95 0.04 155)';
+        const border = !submitted ? (vals[i] ? 'oklch(0.5 0.11 85)' : 'oklch(0.88 0.04 85)') : r === 'wrong' ? 'oklch(0.52 0.17 25)' : 'oklch(0.48 0.13 155)';
+        return { isText: false, isBlank: true, value: vals[i], w, bg, border, locked: submitted, onChange: e => this.set(i, e.target.value), showFix: submitted && r !== 'right', fix: r === 'close' ? `✓ ${s.ans[0]}` : s.ans[0] };
+      }),
+      submitted, open: !submitted, submit: this.submit, reset: this.reset, onKey: this.onKey,
+      filledLine: `${vals.filter(Boolean).length} of ${blanks.length} filled · Enter to check`,
+      score: `${correct}/${blanks.length}`,
+      scoreLine: correct === blanks.length ? (close ? `All correct. Check the spelling on ${close}.` : 'All correct.') : `The correct answers are shown in green.${close ? ` Small typos count as correct.` : ''}`
+    };
+  }
+}
+</script>
+</body>
+</html>

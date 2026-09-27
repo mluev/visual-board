@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:20px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.55 0.16 250);border-radius:999px;padding:5px 12px;flex-shrink:0">Test</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <span style="font-size:14px;font-weight:500;color:#5C606B;flex-shrink:0">{{ countLabel }}</span>
+  </div>
+  <sc-for list="{{ items }}" as="it" hint-placeholder-count="2">
+    <div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid #ECEEF1">
+      <div style="display:flex;gap:10px;align-items:baseline">
+        <span style="font-size:14px;font-weight:700;color:oklch(0.45 0.16 250)">{{ it.n }}</span>
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:500;line-height:1.3;text-wrap:pretty">{{ it.q }}</span>
+      </div>
+      <sc-if value="{{ it.multi }}"><div style="font-size:13px;font-weight:500;color:#5C606B">Select all that apply</div></sc-if>
+      <sc-if value="{{ it.hasCode }}"><pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.5;background:#F4F5F7;border-radius:12px;padding:12px 14px;white-space:pre-wrap">{{ it.code }}</pre></sc-if>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px">
+        <sc-for list="{{ it.options }}" as="o" hint-placeholder-count="4">
+          <button onClick="{{ o.onClick }}" style="display:flex;gap:12px;align-items:center;text-align:left;padding:10px 12px;border-radius:14px;font-size:16px;font-weight:500;color:#1B1D22;background:{{ o.bg }};border:2px solid {{ o.border }}">
+            <span style="font-size:13px;font-weight:700;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:{{ o.radius }};background:{{ o.lbg }};color:{{ o.lcolor }}">{{ o.mark }}</span><span style="flex:1">{{ o.text }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ it.showExpl }}">
+        <div style="display:flex;gap:10px;font-size:15px;line-height:1.45;color:#3E424B;text-wrap:pretty"><span style="font-weight:700;white-space:nowrap;color:{{ it.resColor }}">{{ it.resLabel }}</span><span>{{ it.explain }}</span></div>
+      </sc-if>
+    </div>
+  </sc-for>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #ECEEF1">
+    <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:baseline;gap:12px">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-weight:700;line-height:1;color:oklch(0.42 0.16 250)">{{ score }}</span>
+        <span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span>
+      </div>
+      <button onClick="{{ reset }}" style="background:oklch(0.96 0.03 250);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Try again</button>
+    </sc-if>
+    <sc-if value="{{ open }}" hint-placeholder-val="{{ true }}">
+      <span style="font-size:15px;color:#5C606B">{{ answeredLine }}</span>
+      <button onClick="{{ submit }}" style="background:oklch(0.55 0.16 250);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700;opacity:{{ submitOpacity }}">Submit answers</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:620},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Quick check&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;questions&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{q:string, code?:string, options:string[], answer:number|number[], explain?:string}[]&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;blank&quot;,&quot;answered&quot;,&quot;submitted&quot;],&quot;default&quot;:&quot;blank&quot;,&quot;tsType&quot;:&quot;'blank'|'answered'|'submitted'&quot;}}">
+const DEMO = [
+  { q: 'Choose the correct sentence.', options: ['She don\u2019t like coffee.', 'She doesn\u2019t like coffee.', 'She not like coffee.', 'She doesn\u2019t likes coffee.'], answer: 1, explain: 'Third-person singular takes "doesn\u2019t" + the base verb (like, not likes).' },
+  { q: 'Which of these are prime?', options: ['21', '23', '27', '29'], answer: [1, 3], explain: '23 and 29 have no divisors other than 1 and themselves. 21 = 3·7, 27 = 3³.' }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const ans = q => Array.isArray(q.answer) ? q.answer : [q.answer];
+const C = { sel: 'oklch(0.96 0.03 250)', selB: 'oklch(0.55 0.16 250)', okBg: 'oklch(0.95 0.04 155)', ok: 'oklch(0.48 0.13 155)', badBg: 'oklch(0.95 0.03 25)', bad: 'oklch(0.52 0.17 25)' };
+
+class Component extends DCLogic {
+  state = this.initState();
+  qs() { const q = parse(this.props.questions); return Array.isArray(q) && q.length ? q : DEMO; }
+  initState() {
+    const ini = this.props.initial, qs = this.qs();
+    if (ini === 'answered' || ini === 'submitted') return { picks: qs.map((q, i) => i === qs.length - 1 && ans(q).length > 1 ? [ans(q)[0]] : [...ans(q)]), submitted: ini === 'submitted' };
+    return { picks: qs.map(() => []), submitted: false };
+  }
+  toggle(qi, oi) {
+    if (this.state.submitted) return;
+    const multi = ans(this.qs()[qi]).length > 1;
+    this.setState(s => { const p = s.picks.map(x => [...x]); p[qi] = multi ? (p[qi].includes(oi) ? p[qi].filter(x => x !== oi) : [...p[qi], oi]) : [oi]; return { picks: p }; });
+  }
+  isRight(q, p) { const a = ans(q); return p.length === a.length && a.every(x => p.includes(x)); }
+  submit = () => { if (this.state.picks.some(p => !p.length)) return; this.setState({ submitted: true }); };
+  reset = () => this.setState({ picks: this.qs().map(() => []), submitted: false });
+
+  renderVals() {
+    const qs = this.qs(), { picks, submitted } = this.state;
+    const answered = picks.filter(p => p.length).length;
+    const correct = qs.filter((q, i) => this.isRight(q, picks[i])).length;
+    return {
+      title: this.props.title ?? 'Quick check',
+      countLabel: `${qs.length} questions`,
+      submitted, open: !submitted,
+      answeredLine: `${answered} of ${qs.length} answered`,
+      submitOpacity: answered === qs.length ? 1 : 0.35,
+      submit: this.submit, reset: this.reset,
+      score: `${correct}/${qs.length}`,
+      scoreLine: correct === qs.length ? 'All correct.' : `${qs.length - correct} to review above.`,
+      items: qs.map((q, qi) => {
+        const a = ans(q), multi = a.length > 1, p = picks[qi], right = this.isRight(q, p);
+        return {
+          n: qi + 1, q: q.q, multi, code: q.code || '', hasCode: !!q.code,
+          showExpl: submitted && !!q.explain, explain: q.explain || '',
+          resLabel: right ? 'Correct' : 'Not quite', resColor: right ? C.ok : C.bad,
+          options: q.options.map((t, oi) => {
+            const s = p.includes(oi), isA = a.includes(oi);
+            let bg = '#F4F5F7', border = '#F4F5F7', lbg = '#FFFFFF', lcolor = '#5C606B', mark = multi ? '' : 'ABCDEFGH'[oi];
+            if (!submitted && s) { bg = C.sel; border = C.selB; lbg = C.selB; lcolor = '#FFFFFF'; if (multi) mark = '✓'; }
+            if (submitted && isA) { bg = C.okBg; border = C.ok; lbg = C.ok; lcolor = '#FFFFFF'; mark = '✓'; }
+            else if (submitted && s) { bg = C.badBg; border = C.bad; lbg = C.bad; lcolor = '#FFFFFF'; mark = '✕'; }
+            return { text: t, mark, bg, border, lbg, lcolor, radius: multi ? '7px' : '50%', onClick: () => this.toggle(qi, oi) };
+          })
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

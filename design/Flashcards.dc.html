@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div tabIndex="0" onKeyDown="{{ onKey }}" style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;min-height:460px;height:100%;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22;outline:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.55 0.16 290);border-radius:999px;padding:5px 12px;flex-shrink:0">Flashcards</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ title }}</span>
+    </div>
+    <span style="font-size:14px;font-weight:500;color:#5C606B;flex-shrink:0">{{ leftLabel }}</span>
+  </div>
+  <div style="height:8px;background:oklch(0.95 0.03 290);border-radius:4px"><div style="height:8px;border-radius:4px;background:oklch(0.55 0.16 290);width:{{ pct }};transition:width .3s"></div></div>
+  <sc-if value="{{ notDone }}" hint-placeholder-val="{{ true }}">
+    <div onClick="{{ flip }}" style="flex:1;min-height:230px;background:oklch(0.97 0.02 290);border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:10px;cursor:pointer">
+      <sc-if value="{{ showFront }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ hasHint }}"><div style="font-size:13px;font-weight:700;color:oklch(0.45 0.16 290)">{{ hint }}</div></sc-if>
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:42px;font-weight:700;line-height:1.1;letter-spacing:-.02em;text-wrap:balance">{{ front }}</div>
+        <div style="font-size:14px;color:#5C606B">Tap or press Space to flip</div>
+      </sc-if>
+      <sc-if value="{{ flipped }}">
+        <div style="font-size:14px;font-weight:500;color:#5C606B">{{ front }}</div>
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:500;line-height:1.25;text-wrap:pretty">{{ back }}</div>
+        <sc-if value="{{ hasExample }}"><div style="font-size:16px;color:#5C606B;line-height:1.45;text-wrap:pretty">{{ example }}</div></sc-if>
+      </sc-if>
+    </div>
+    <sc-if value="{{ showFront }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ flip }}" style="background:oklch(0.55 0.16 290);color:#FFFFFF;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:700">Show answer</button>
+    </sc-if>
+    <sc-if value="{{ flipped }}">
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+        <sc-for list="{{ grades }}" as="g" hint-placeholder-count="4">
+          <button onClick="{{ g.onClick }}" style="background:oklch(0.95 0.03 290);border:none;border-radius:14px;color:#1B1D22;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:2px" style-hover="background:oklch(0.91 0.05 290)">
+            <span style="font-size:15px;font-weight:700">{{ g.label }}</span>
+            <span style="font-size:13px;color:#5C606B">{{ g.ivl }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+  </sc-if>
+  <sc-if value="{{ done }}">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:700;letter-spacing:-.01em">Deck complete</div>
+        <div style="font-size:15px;color:#5C606B">{{ doneLine }}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+        <sc-for list="{{ summary }}" as="s" hint-placeholder-count="4">
+          <div style="background:oklch(0.97 0.02 290);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:2px">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700">{{ s.count }}</span>
+            <span style="font-size:13px;color:#5C606B">{{ s.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <button onClick="{{ restart }}" style="align-self:flex-start;background:oklch(0.95 0.03 290);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Review again</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:520,&quot;height&quot;:480},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Mixed review&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;cards&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{front:string, back:string, hint?:string, example?:string}[]&quot;},&quot;deckId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;front&quot;,&quot;back&quot;,&quot;done&quot;],&quot;default&quot;:&quot;front&quot;,&quot;tsType&quot;:&quot;'front'|'back'|'done'&quot;}}">
+const GR = [['again', 'Again'], ['hard', 'Hard'], ['good', 'Good'], ['easy', 'Easy']];
+const DEMO = [
+  { front: 'ubiquitous', hint: 'English · adjective', back: 'Present, appearing, or found everywhere.', example: 'Smartphones have become ubiquitous in daily life.' },
+  { front: '∫ 2x dx', hint: 'Calculus', back: 'x² + C', example: 'Power rule: ∫ xⁿ dx = xⁿ⁺¹ ⁄ (n+1) + C' },
+  { front: 'make(chan int)', hint: 'Go · channels', back: 'Creates an unbuffered channel of ints.', example: 'A send blocks until another goroutine receives.' }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const fmtIvl = d => d <= 0 ? '<1m' : d < 1 ? Math.max(1, Math.round(d * 24)) + 'h' : d < 30 ? Math.round(d) + 'd' : Math.round(d / 30) + 'mo';
+const nextIvl = (c, g) => { const b = c.ivl; if (g === 'again') return 0; if (g === 'hard') return b ? b * 1.2 : 0.25; if (g === 'good') return b ? b * c.ease : 1; return b ? b * c.ease * 1.3 : 4; };
+
+class Component extends DCLogic {
+  state = this.initState();
+
+  cards() { const c = parse(this.props.cards); return Array.isArray(c) && c.length ? c : DEMO; }
+  key() { return this.props.deckId ? 'lk-deck-' + this.props.deckId : null; }
+  loadSched() { const k = this.key(); if (!k) return {}; try { return JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { return {}; } }
+  initState() {
+    const n = this.cards().length, ini = this.props.initial;
+    const counts = ini === 'done' ? { again: 1, hard: 0, good: Math.max(0, n - 1), easy: 1 } : { again: 0, hard: 0, good: 0, easy: 0 };
+    return { queue: ini === 'done' ? [] : [...Array(n).keys()], flip: ini === 'back', counts, sched: this.loadSched() };
+  }
+  flip = () => this.setState(s => ({ flip: !s.flip }));
+  grade(g) {
+    const { queue, sched, counts } = this.state;
+    if (!queue.length) return;
+    const i = queue[0], cur = sched[i] || { ivl: 0, ease: 2.5 };
+    const ease = g === 'again' ? Math.max(1.3, cur.ease - 0.2) : g === 'hard' ? Math.max(1.3, cur.ease - 0.15) : g === 'easy' ? cur.ease + 0.15 : cur.ease;
+    const ns = { ...sched, [i]: { ivl: nextIvl(cur, g), ease } };
+    const nq = queue.slice(1); if (g === 'again') nq.push(i);
+    const k = this.key(); if (k) try { localStorage.setItem(k, JSON.stringify(ns)); } catch (e) {}
+    this.setState({ queue: nq, flip: false, sched: ns, counts: { ...counts, [g]: counts[g] + 1 } });
+  }
+  restart = () => this.setState({ queue: [...Array(this.cards().length).keys()], flip: false, counts: { again: 0, hard: 0, good: 0, easy: 0 } });
+  onKey = e => {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (this.state.queue.length) this.flip(); }
+    else if (this.state.flip && '1234'.includes(e.key)) this.grade(GR[+e.key - 1][0]);
+  };
+
+  renderVals() {
+    const cards = this.cards(), { queue, flip, counts, sched } = this.state;
+    const done = !queue.length, card = cards[queue[0] ?? 0] || cards[0];
+    const left = new Set(queue).size;
+    const cur = sched[queue[0]] || { ivl: 0, ease: 2.5 };
+    const total = counts.again + counts.hard + counts.good + counts.easy;
+    return {
+      title: this.props.title ?? 'Mixed review',
+      leftLabel: done ? `${cards.length} cards` : `${left} left`,
+      pct: ((cards.length - left) / cards.length) * 100 + '%',
+      done, notDone: !done, flipped: flip && !done, showFront: !flip,
+      front: card.front, back: card.back, hint: card.hint || '', hasHint: !!card.hint, example: card.example || '', hasExample: !!card.example,
+      flip: this.flip, restart: this.restart, onKey: this.onKey,
+      grades: GR.map(([k, label], n) => ({ label, ivl: fmtIvl(nextIvl(cur, k)), onClick: e => { e && e.stopPropagation(); this.grade(k); } })),
+      summary: GR.map(([k, label]) => ({ label, count: counts[k] })),
+      doneLine: `${cards.length} cards · ${total} reviews · ${counts.again} to relearn`
+    };
+  }
+}
+</script>
+</body>
+</html>

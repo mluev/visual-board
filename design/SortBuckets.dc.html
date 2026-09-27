@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.5 0.11 85);border-radius:999px;padding:5px 12px;flex-shrink:0">Sort</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <span style="font-size:14px;font-weight:500;color:#5C606B;flex-shrink:0">{{ progress }}</span>
+  </div>
+  <sc-if value="{{ hasPool }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:8px;background:oklch(0.97 0.02 85);border-radius:16px;padding:14px">
+      <span style="font-size:14px;font-weight:500;color:#5C606B">{{ poolHint }}</span>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ pool }}" as="it" hint-placeholder-count="6">
+          <button draggable="true" onDragStart="{{ it.onDragStart }}" onClick="{{ it.onClick }}" style="border-radius:999px;padding:8px 14px;font-size:15px;font-weight:500;color:#1B1D22;cursor:grab;background:{{ it.bg }};border:2px solid {{ it.border }};font-family:{{ it.font }}">{{ it.text }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+    <sc-for list="{{ buckets }}" as="b" hint-placeholder-count="3">
+      <div onClick="{{ b.onClick }}" onDragOver="{{ b.onDragOver }}" onDrop="{{ b.onDrop }}" style="display:flex;flex-direction:column;gap:8px;border-radius:16px;padding:12px;min-height:150px;cursor:pointer;transition:border-color .15s;background:#F4F5F7;border:2px dashed {{ b.border }}">
+        <span style="font-size:15px;font-weight:700">{{ b.name }}</span>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <sc-for list="{{ b.items }}" as="it">
+            <button onClick="{{ it.onClick }}" title="{{ it.why }}" style="border-radius:999px;padding:6px 12px;font-size:14px;font-weight:500;color:#1B1D22;background:{{ it.bg }};border:2px solid {{ it.border }};font-family:{{ it.font }}">{{ it.text }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <sc-if value="{{ showWhy }}">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <sc-for list="{{ whys }}" as="w"><div style="font-size:15px;line-height:1.45;color:#3E424B;text-wrap:pretty"><span style="font-weight:700;color:oklch(0.52 0.17 25)">{{ w.text }}</span> → {{ w.cat }}. {{ w.why }}</div></sc-for>
+    </div>
+  </sc-if>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #ECEEF1;flex-wrap:wrap">
+    <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:baseline;gap:12px">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-weight:700;line-height:1;color:oklch(0.42 0.1 85)">{{ score }}</span>
+        <span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span>
+      </div>
+      <button onClick="{{ reset }}" style="background:oklch(0.95 0.04 85);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Try again</button>
+    </sc-if>
+    <sc-if value="{{ open }}" hint-placeholder-val="{{ true }}">
+      <span style="font-size:15px;color:#5C606B">{{ leftLine }}</span>
+      <button onClick="{{ submit }}" style="background:oklch(0.5 0.11 85);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700;opacity:{{ submitOp }}">Check</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:680,&quot;height&quot;:520},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Parts of speech&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;categories&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;items&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{text:string, cat:number, why?:string}[]&quot;},&quot;mono&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;blank&quot;,&quot;submitted&quot;],&quot;default&quot;:&quot;blank&quot;,&quot;tsType&quot;:&quot;'blank'|'submitted'&quot;}}">
+const DEMO_CATS = ['Noun', 'Verb', 'Adjective'];
+const DEMO = [
+  { text: 'happiness', cat: 0, why: '-ness turns an adjective into a noun.' }, { text: 'run', cat: 1 }, { text: 'enormous', cat: 2 },
+  { text: 'bright', cat: 2 }, { text: 'decide', cat: 1 }, { text: 'decision', cat: 0, why: '-sion makes a noun from the verb "decide".' }, { text: 'careful', cat: 2 }, { text: 'city', cat: 0 }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+
+class Component extends DCLogic {
+  state = this.initState();
+  cats() { const c = parse(this.props.categories); return Array.isArray(c) && c.length ? c : DEMO_CATS; }
+  items() { const p = parse(this.props.items); return Array.isArray(p) && p.length ? p : DEMO; }
+  initState() {
+    const items = this.items();
+    if (this.props.initial === 'submitted') return { place: items.map((it, i) => i === 5 ? 1 : it.cat), sel: null, submitted: true };
+    return { place: items.map(() => null), sel: null, submitted: false };
+  }
+  put(i, c) { this.setState(s => { const p = [...s.place]; p[i] = c; return { place: p, sel: null }; }); }
+  submit = () => { if (this.state.place.some(p => p == null)) return; this.setState({ submitted: true }); };
+  reset = () => this.setState({ place: this.items().map(() => null), sel: null, submitted: false });
+  renderVals() {
+    const cats = this.cats(), items = this.items(), { place, sel, submitted } = this.state;
+    const font = this.props.mono ? "'JetBrains Mono',monospace" : 'inherit';
+    const left = place.filter(p => p == null).length, correct = items.filter((it, i) => place[i] === it.cat).length;
+    const chip = (it, i) => {
+      const ok = place[i] === it.cat;
+      return {
+        text: it.text, why: it.why || '', font,
+        bg: submitted ? (ok ? 'oklch(0.95 0.04 155)' : 'oklch(0.95 0.03 25)') : '#FFFFFF',
+        border: submitted ? (ok ? 'oklch(0.48 0.13 155)' : 'oklch(0.52 0.17 25)') : '#E2E4E9',
+        onClick: e => { e.stopPropagation(); if (!submitted) this.put(i, null); }
+      };
+    };
+    return {
+      title: this.props.title ?? 'Parts of speech',
+      progress: `${items.length - left} / ${items.length} placed`,
+      hasPool: left > 0,
+      poolHint: sel == null ? 'Pick a word, then click a group. You can also drag.' : `Now click a group for "${items[sel].text}"`,
+      pool: items.map((it, i) => ({ it, i })).filter(x => place[x.i] == null).map(({ it, i }) => ({
+        text: it.text, font, bg: sel === i ? 'oklch(0.95 0.04 85)' : '#FFFFFF', border: sel === i ? 'oklch(0.5 0.11 85)' : '#E2E4E9',
+        onClick: () => this.setState(s => ({ sel: s.sel === i ? null : i })),
+        onDragStart: e => { e.dataTransfer.setData('text/plain', String(i)); this.setState({ sel: i }); }
+      })),
+      buckets: cats.map((name, c) => ({
+        name, border: sel != null ? 'oklch(0.5 0.11 85)' : '#D5D8DE',
+        onClick: () => { if (sel != null && !submitted) this.put(sel, c); },
+        onDragOver: e => e.preventDefault(),
+        onDrop: e => { e.preventDefault(); const i = +e.dataTransfer.getData('text/plain'); if (!submitted && !isNaN(i)) this.put(i, c); },
+        items: items.map((it, i) => ({ it, i })).filter(x => place[x.i] === c).map(({ it, i }) => chip(it, i))
+      })),
+      showWhy: submitted && correct < items.length,
+      whys: items.map((it, i) => ({ it, i })).filter(x => place[x.i] !== x.it.cat).map(({ it }) => ({ text: it.text, cat: cats[it.cat], why: it.why || '' })),
+      submitted, open: !submitted, submit: this.submit, reset: this.reset,
+      leftLine: left ? `${left} left to place` : 'All placed',
+      submitOp: left ? 0.35 : 1,
+      score: `${correct}/${items.length}`,
+      scoreLine: correct === items.length ? 'All sorted correctly.' : `${items.length - correct} in the wrong group.`
+    };
+  }
+}
+</script>
+</body>
+</html>

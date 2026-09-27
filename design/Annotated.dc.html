@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.52 0.12 195);border-radius:999px;padding:5px 12px;flex-shrink:0">Annotated</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <span style="font-size:14px;font-weight:500;color:#5C606B;font-variant-numeric:tabular-nums">{{ pos }}</span>
+      <button onClick="{{ prev }}" aria-label="Previous note" style="width:34px;height:34px;border:none;border-radius:50%;background:#F4F5F7;font-size:15px;color:#1B1D22">←</button>
+      <button onClick="{{ next }}" aria-label="Next note" style="width:34px;height:34px;border:none;border-radius:50%;background:#F4F5F7;font-size:15px;color:#1B1D22">→</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px;align-items:start">
+    <div style="border-radius:14px;padding:16px;white-space:pre-wrap;overflow-x:auto;background:{{ boxBg }};color:{{ boxColor }};font-family:{{ font }};font-size:{{ size }};line-height:{{ lh }}"><sc-for list="{{ segs }}" as="s" hint-placeholder-count="5"><sc-if value="{{ s.plain }}"><span>{{ s.text }}</span></sc-if><sc-if value="{{ s.marked }}"><span onMouseEnter="{{ s.onEnter }}" onClick="{{ s.onEnter }}" style="border-radius:5px;padding:1px 2px;cursor:pointer;transition:background .15s;background:{{ s.bg }};color:{{ s.color }};box-shadow:0 2px 0 {{ s.line }}">{{ s.text }}<sup style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;margin-left:2px;color:{{ s.supColor }}">{{ s.n }}</sup></span></sc-if></sc-for></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ notes }}" as="n" hint-placeholder-count="3">
+        <button onClick="{{ n.onClick }}" style="display:flex;gap:10px;align-items:flex-start;text-align:left;padding:10px 12px;border-radius:12px;font-size:15px;line-height:1.45;color:#1B1D22;transition:background .15s;background:{{ n.bg }};border:2px solid {{ n.border }}">
+          <span style="width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:{{ n.numBg }};color:{{ n.numColor }}">{{ n.n }}</span>
+          <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:oklch(0.4 0.1 195);overflow-wrap:anywhere">{{ n.mark }}</span><span style="text-wrap:pretty">{{ n.note }}</span></span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:820,&quot;height&quot;:520},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A Go worker pool, line by line&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;text&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;notes&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{mark:string (exact substring of text), note:string}[]&quot;},&quot;mono&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const DEMO_TEXT = 'func worker(id int, jobs <-chan int, results chan<- int) {\n    for j := range jobs {\n        results <- j * 2\n    }\n}\n\nfunc main() {\n    jobs := make(chan int, 100)\n    results := make(chan int, 100)\n    for w := 1; w <= 3; w++ {\n        go worker(w, jobs, results)\n    }\n}';
+const DEMO_NOTES = [
+  { mark: '<-chan int', note: 'Receive-only channel. The worker can read jobs but can\u2019t send on it.' },
+  { mark: 'chan<- int', note: 'Send-only channel: the worker only writes results.' },
+  { mark: 'range jobs', note: 'Loops until the jobs channel is closed and drained.' },
+  { mark: 'make(chan int, 100)', note: 'Buffered channel: up to 100 sends can happen before a send blocks.' },
+  { mark: 'go worker', note: 'Starts each worker in its own goroutine, so three workers run at the same time.' }
+];
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return null; } } return v; };
+const T = 'oklch(0.52 0.12 195)';
+
+class Component extends DCLogic {
+  state = { a: 0 };
+  renderVals() {
+    const demo = !this.props.text, text = demo ? DEMO_TEXT : this.props.text, N = demo ? DEMO_NOTES : parse(this.props.notes) || [];
+    const mono = this.props.mono ?? demo, a = this.state.a;
+    const hits = []; N.forEach((n, i) => { const at = text.indexOf(n.mark); if (at >= 0 && !hits.some(h => at < h.end && at + n.mark.length > h.at)) hits.push({ at, end: at + n.mark.length, i }); });
+    hits.sort((x, y) => x.at - y.at);
+    const segs = []; let last = 0;
+    hits.forEach(h => { if (h.at > last) segs.push({ t: text.slice(last, h.at) }); segs.push({ t: text.slice(h.at, h.end), i: h.i }); last = h.end; });
+    if (last < text.length) segs.push({ t: text.slice(last) });
+    const dark = mono;
+    const go = d => this.setState(s => ({ a: (s.a + d + N.length) % N.length }));
+    return {
+      title: this.props.title ?? 'A Go worker pool, line by line',
+      pos: `${a + 1} / ${N.length}`, prev: () => go(-1), next: () => go(1),
+      font: mono ? "'JetBrains Mono',monospace" : "'DM Sans',sans-serif", size: mono ? '14px' : '17px', lh: mono ? '1.7' : '1.8',
+      boxBg: dark ? '#1B1D22' : '#F4F5F7', boxColor: dark ? '#C9CBCF' : '#1B1D22',
+      segs: segs.map(s => {
+        if (s.i == null) return { plain: true, marked: false, text: s.t };
+        const on = s.i === a;
+        return { plain: false, marked: true, text: s.t, n: s.i + 1, onEnter: () => this.setState({ a: s.i }),
+          bg: on ? T : dark ? 'oklch(0.32 0.04 195)' : 'oklch(0.93 0.04 195)', color: on ? '#FFFFFF' : dark ? '#ECEDEE' : '#1B1D22',
+          line: on ? 'transparent' : 'oklch(0.7 0.1 195)', supColor: on ? '#FFFFFF' : 'oklch(0.75 0.08 195)' };
+      }),
+      notes: N.map((n, i) => { const on = i === a; return { n: i + 1, mark: n.mark, note: n.note, onClick: () => this.setState({ a: i }), bg: on ? 'oklch(0.97 0.02 195)' : '#FFFFFF', border: on ? T : '#ECEEF1', numBg: on ? T : '#F4F5F7', numColor: on ? '#FFFFFF' : '#3E424B' }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

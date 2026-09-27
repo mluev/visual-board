@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<div style="background:#FFFFFF;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;box-shadow:0 1px 2px rgba(20,22,30,.06);font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="font-size:13px;font-weight:700;color:#FFFFFF;background:oklch(0.5 0.11 85);border-radius:999px;padding:5px 12px;flex-shrink:0">Order</span>
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em">{{ title }}</span>
+    </div>
+    <span style="font-size:14px;font-weight:500;color:#5C606B;flex-shrink:0">{{ countLabel }}</span>
+  </div>
+  <div style="font-size:15px;color:#5C606B">{{ instruction }}</div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+      <div draggable="{{ r.draggable }}" onDragStart="{{ r.onDragStart }}" onDragOver="{{ r.onDragOver }}" onDrop="{{ r.onDrop }}" onDragEnd="{{ r.onDragEnd }}" style="display:flex;align-items:center;gap:12px;padding:8px 8px 8px 14px;border-radius:14px;transition:background .15s;background:{{ r.bg }};border:2px solid {{ r.border }};opacity:{{ r.opacity }};cursor:{{ r.cursor }}">
+        <span style="font-size:14px;font-weight:700;width:24px;color:{{ r.numColor }}">{{ r.pos }}</span>
+        <span style="flex:1;font-size:16px;font-weight:500;line-height:1.4;text-wrap:pretty;font-family:{{ r.font }}">{{ r.text }}</span>
+        <sc-if value="{{ r.showMoves }}">
+          <div style="display:flex;gap:4px">
+            <button onClick="{{ r.up }}" aria-label="Move up" style="width:34px;height:34px;border:none;border-radius:10px;background:#FFFFFF;color:#1B1D22;font-size:16px;opacity:{{ r.upOp }}">↑</button>
+            <button onClick="{{ r.down }}" aria-label="Move down" style="width:34px;height:34px;border:none;border-radius:10px;background:#FFFFFF;color:#1B1D22;font-size:16px;opacity:{{ r.downOp }}">↓</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ r.showFix }}"><span style="font-size:13px;font-weight:700;color:oklch(0.52 0.17 25);padding-right:6px;white-space:nowrap">{{ r.fix }}</span></sc-if>
+      </div>
+    </sc-for>
+  </div>
+  <sc-if value="{{ showExplain }}"><div style="font-size:15px;line-height:1.5;color:#3E424B;text-wrap:pretty">{{ explain }}</div></sc-if>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid #ECEEF1;flex-wrap:wrap">
+    <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:baseline;gap:12px">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:36px;font-weight:700;line-height:1;color:oklch(0.42 0.1 85)">{{ score }}</span>
+        <span style="font-size:15px;color:#3E424B">{{ scoreLine }}</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <sc-if value="{{ imperfect }}"><button onClick="{{ showCorrect }}" style="background:transparent;color:#1B1D22;border:2px solid oklch(0.9 0.04 85);border-radius:999px;padding:9px 16px;font-size:15px;font-weight:700">Show correct order</button></sc-if>
+        <button onClick="{{ reset }}" style="background:oklch(0.95 0.04 85);color:#1B1D22;border:none;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:700">Try again</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ open }}" hint-placeholder-val="{{ true }}">
+      <span style="font-size:15px;color:#5C606B">Drag rows or use the arrows</span>
+      <button onClick="{{ submit }}" style="background:oklch(0.5 0.11 85);color:#FFFFFF;border:none;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:700">Check order</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:620,&quot;height&quot;:560},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;How blood flows through the heart&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;items&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[] — in the CORRECT order; shuffled on display&quot;},&quot;instruction&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;explain&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mono&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;initial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;blank&quot;,&quot;submitted&quot;],&quot;default&quot;:&quot;blank&quot;,&quot;tsType&quot;:&quot;'blank'|'submitted'&quot;}}">
+const DEMO = ['Blood returns to the right atrium', 'Right ventricle pumps it to the lungs', 'Lungs add oxygen', 'Left atrium receives oxygenated blood', 'Left ventricle pumps it to the body'];
+const DEMO_EXPL = 'Right side → lungs, left side → body. The left ventricle has the thickest wall because it pumps blood around the whole body.';
+const parse = v => { if (typeof v === 'string') { try { return JSON.parse(v); } catch (e) { return []; } } return v; };
+const shuffle = (n, seed) => { const a = [...Array(n).keys()]; let s = seed; for (let i = n - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor((s / 233280) * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } if (n > 1 && a.every((v, i) => v === i)) a.reverse(); return a; };
+
+class Component extends DCLogic {
+  state = this.initState();
+  items() { const p = parse(this.props.items); return Array.isArray(p) && p.length ? p : DEMO; }
+  initState() {
+    const n = this.items().length, order = shuffle(n, 11);
+    if (this.props.initial === 'submitted') { const o = [...Array(n).keys()]; if (n > 3) [o[1], o[2]] = [o[2], o[1]]; return { order: o, submitted: true, drag: null, seed: 11 }; }
+    return { order, submitted: false, drag: null, seed: 11 };
+  }
+  move(from, to) { if (to < 0 || to >= this.state.order.length || from === to) return; this.setState(s => { const o = [...s.order]; const [x] = o.splice(from, 1); o.splice(to, 0, x); return { order: o }; }); }
+  submit = () => this.setState({ submitted: true });
+  reset = () => { const seed = this.state.seed + 17; this.setState({ order: shuffle(this.items().length, seed), submitted: false, seed }); };
+  showCorrect = () => this.setState({ order: [...Array(this.items().length).keys()] });
+  renderVals() {
+    const items = this.items(), { order, submitted, drag } = this.state;
+    const correct = order.filter((v, i) => v === i).length, n = items.length;
+    const explain = this.props.explain ?? (this.props.items == null ? DEMO_EXPL : '');
+    return {
+      title: this.props.title ?? 'How blood flows through the heart',
+      countLabel: `${n} steps`,
+      instruction: this.props.instruction ?? 'Put the steps in the right order, first at the top.',
+      rows: order.map((v, i) => {
+        const ok = v === i;
+        return {
+          pos: i + 1, text: items[v], font: this.props.mono ? "'JetBrains Mono',monospace" : 'inherit',
+          bg: !submitted ? (drag === i ? 'oklch(0.95 0.04 85)' : '#F4F5F7') : ok ? 'oklch(0.95 0.04 155)' : 'oklch(0.95 0.03 25)',
+          border: !submitted ? (drag === i ? 'oklch(0.5 0.11 85)' : '#F4F5F7') : ok ? 'oklch(0.48 0.13 155)' : 'oklch(0.52 0.17 25)',
+          numColor: !submitted ? 'oklch(0.42 0.1 85)' : ok ? 'oklch(0.48 0.13 155)' : 'oklch(0.52 0.17 25)',
+          opacity: 1, cursor: submitted ? 'default' : 'grab', draggable: !submitted,
+          showMoves: !submitted, upOp: i === 0 ? 0.3 : 1, downOp: i === n - 1 ? 0.3 : 1,
+          up: () => this.move(i, i - 1), down: () => this.move(i, i + 1),
+          showFix: submitted && !ok, fix: `belongs at ${v + 1}`,
+          onDragStart: e => { e.dataTransfer.effectAllowed = 'move'; this.setState({ drag: i }); },
+          onDragOver: e => { e.preventDefault(); if (drag != null && drag !== i) { this.move(drag, i); this.setState({ drag: i }); } },
+          onDrop: e => { e.preventDefault(); this.setState({ drag: null }); },
+          onDragEnd: () => this.setState({ drag: null })
+        };
+      }),
+      submitted, open: !submitted, submit: this.submit, reset: this.reset, showCorrect: this.showCorrect,
+      imperfect: correct < n,
+      showExplain: submitted && !!explain, explain,
+      score: `${correct}/${n}`,
+      scoreLine: correct === n ? 'Perfect order.' : `${n - correct} in the wrong place.`
+    };
+  }
+}
+</script>
+</body>
+</html>

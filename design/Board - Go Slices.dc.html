@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#ECEEF1;-webkit-font-smoothing:antialiased;font-variant-ligatures:none}button{font:inherit;cursor:pointer}a{color:oklch(0.45 0.14 250)}a:hover{color:oklch(0.35 0.14 250)}</style>
+</helmet>
+<main style="max-width:1160px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px;font-family:'DM Sans',sans-serif;color:#1B1D22">
+  <header style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;padding:0 8px 8px">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:14px;font-weight:700;color:#5C606B">Go · Lesson 3</span>
+      <h1 style="margin:0;font-family:'Bricolage Grotesque',sans-serif;font-size:44px;font-weight:700;line-height:1.05;letter-spacing:-.025em">Slices, from the inside</h1>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span style="font-size:14px;font-weight:500;background:#FFFFFF;border-radius:999px;padding:6px 12px">~15 min</span>
+      <span style="font-size:14px;font-weight:500;background:#FFFFFF;border-radius:999px;padding:6px 12px">Beginner</span>
+    </div>
+  </header>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px;align-items:stretch">
+    <dc-import name="Explainer" hint-size="100%,460px"></dc-import>
+    <dc-import name="BarChart" title="Why append is cheap on average" data="{{ capData }}" param="{{ capParam }}" note="{{ capNote }}" highlight="{{ lastIdx }}" hint-size="100%,460px"></dc-import>
+    <dc-import name="Flashcards" title="Slice vocabulary" deck-id="go-slices" cards="{{ cards }}" hint-size="100%,460px"></dc-import>
+    <dc-import name="Quiz" title="Slices check-in" quiz-id="go-slices" questions="{{ quiz }}" time-limit="{{ quizTime }}" hint-size="100%,460px"></dc-import>
+    <dc-import name="Whiteboard" title="Sketch it" prompt="a := [4]int{1,2,3,4}; s := a[1:3]; s = append(s, 9). Draw a, s and their shared memory. What is a[3] now?" board-id="go-slices" height="{{ wbHeight }}" style="grid-column:1 / -1" hint-size="100%,480px"></dc-import>
+  </div>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CARDS = [
+  { front: 'len(s)', hint: 'Go · slices', back: 'Number of elements the slice currently holds.', example: 'len([]int{1,2,3}) == 3' },
+  { front: 'cap(s)', hint: 'Go · slices', back: 'Elements available in the backing array from the slice\u2019s start.', example: 's := make([]int, 2, 8) // cap 8' },
+  { front: 's[low:high]', hint: 'Go · slicing', back: 'A new slice over the same array, from low up to (not including) high.', example: 'No data is copied.' },
+  { front: 'copy(dst, src)', hint: 'Go · built-in', back: 'Copies min(len(dst), len(src)) elements and returns the count.', example: 'Use it to break sharing between slices.' }
+];
+const QUIZ = [
+  { q: 'What is len(s) and cap(s)?', code: 'a := [6]int{}\ns := a[2:4]', options: ['2 and 2', '2 and 4', '4 and 6', '2 and 6'], answer: 1, explain: 'len = 4 - 2 = 2. cap counts from index 2 to the end of a: 6 - 2 = 4.' },
+  { q: 'Why must you write s = append(s, x)?', options: ['append is lazy', 'append may return a slice with a new backing array', 'append sorts the slice', 'It\u2019s only a style rule'], answer: 1, explain: 'When cap is exceeded, append allocates a bigger array and returns a new header pointing to it.' },
+  { q: 'What prints?', code: 'a := []int{1, 2, 3}\nb := a[:2]\nb[0] = 9\nfmt.Println(a[0])', options: ['1', '9', '0', 'panic'], answer: 1, explain: 'b shares a\u2019s backing array, so writing b[0] changes a[0].' },
+  { q: 'The zero value of a slice is…', options: ['[]int{}', 'nil', 'a panic', 'undefined'], answer: 1, explain: 'A nil slice has len 0 and cap 0 and is safe to append to.' }
+];
+const caps = n => { const out = []; let c = 0; for (let i = 1; i <= n; i++) if (i > c) { c = c ? c * 2 : 1; out.push(c); } return out; };
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      cards: CARDS, quiz: QUIZ, quizTime: 120, wbHeight: 380,
+      capParam: { name: 'appends', min: 1, max: 64, step: 1, value: 20 },
+      capData: n => caps(n).map((c, i) => ({ label: `#${i + 1}`, value: c })),
+      capNote: (n, d) => `${n} appends needed only ${d.length} allocations. Capacity doubles each time, so the total copying stays proportional to n.`,
+      lastIdx: -1
+    };
+  }
+}
+</script>
+</body>
+</html>
