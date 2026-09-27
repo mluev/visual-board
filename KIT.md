@@ -405,7 +405,7 @@ props: {
   }
 ```
 **Saves:** One attempt per "Check steps": items[{prompt: "Step n of: <problem>", answer, expected: work, correct}] for the hidden steps; meta.mode. Wrong answers are marked needsReview (they may be an equivalent form).
-**Notes:** Answers are compared ignoring spaces, with − and - (and ×, ·, *) treated as the same.
+**Notes:** Each answer is compared with `work` and every `accept` entry as a whole string, ignoring case and spaces, with − and - (and ×, ·, *) treated as the same. Order is not normalised: add "x = 3 or x = 2" to accept if both orders are fine.
 **Variants shown in /kit:** faded (initial: "faded")
 ```ts
 { type: 'WorkedExample', id: '…', props: {
@@ -676,8 +676,8 @@ props: {
   params?: PlotParam[] = []
   x?: [number, number] = [-6,6]  — x range
   y?: [number, number] = [-6,6]  — y range
-  formula?: string | (p) => string  — Shown above the sliders. Default: function names
-  note?: string | (p) => string
+  formula?: string | (p: Record<string, number>) => string  — Shown above the sliders. Default: function names
+  note?: string | (p: Record<string, number>) => string
 }
 
   PlotFn = {
@@ -693,6 +693,7 @@ props: {
     value: number
   }
 ```
+**Notes:** p is { [param.name]: current slider value } for every entry in params. fns can mix live curves (using p) with fixed reference curves (ignoring p), e.g. the plain y = x² for comparison. Points where f returns NaN/Infinity are skipped (gaps in the curve).
 **Variants shown in /kit:** compare (Two functions, no parameters)
 ```ts
 { type: 'FunctionPlot', id: '…', props: {
@@ -724,6 +725,7 @@ props: {
     value: number
   }
 ```
+**Notes:** A part can be a single symbol ("m") or a group that is explained as one idea ("(−b ± √(b² − 4ac))"). The calculator shows "—" when f throws or returns NaN/Infinity, so pick default values that give a real answer.
 **Variants shown in /kit:** plain (No calculator)
 ```ts
 { type: 'Formula', id: '…', props: {

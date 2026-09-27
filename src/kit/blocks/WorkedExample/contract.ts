@@ -18,7 +18,7 @@ export const workedExample = defineContract({
   purpose: 'A solved problem, step by step with reasons, and three modes: Study (all shown), Faded (the second half hidden) and Solve (write every step).',
   whenToUse: 'Maths, physics, algorithms, grammar transformations: anything solved in steps. 3–6 steps. The learner studies it, then fades to solving alone.',
   results: 'One attempt per "Check steps": items[{prompt: "Step n of: <problem>", answer, expected: work, correct}] for the hidden steps; meta.mode. Wrong answers are marked needsReview (they may be an equivalent form).',
-  notes: ['Answers are compared ignoring spaces, with − and - (and ×, ·, *) treated as the same.'],
+  notes: ['Each answer is compared with `work` and every `accept` entry as a whole string, ignoring case and spaces, with − and - (and ×, ·, *) treated as the same. Order is not normalised: add "x = 3 or x = 2" to accept if both orders are fine.'],
   schema: z.object({
     title: z.string().default(''),
     problem: z.string().describe('The problem statement'),

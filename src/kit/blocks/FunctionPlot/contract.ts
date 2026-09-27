@@ -23,14 +23,15 @@ export const functionPlot = defineContract({
   pill: 'Plot',
   purpose: 'Plots y = f(x) on a grid with sliders for parameters, a live formula, hover read-out and a note that updates with the parameters.',
   whenToUse: 'Maths and physics: how a, b, c change a graph (parabolas, sine waves, exponentials), comparing functions, seeing roots and intercepts.',
+  notes: ['p is { [param.name]: current slider value } for every entry in params. fns can mix live curves (using p) with fixed reference curves (ignoring p), e.g. the plain y = x² for comparison. Points where f returns NaN/Infinity are skipped (gaps in the curve).'],
   schema: z.object({
     title: z.string().default(''),
     fns: z.array(PlotFn).min(1),
     params: z.array(PlotParam).default([]),
     x: z.tuple([z.number(), z.number()]).default([-6, 6]).describe('x range'),
     y: z.tuple([z.number(), z.number()]).default([-6, 6]).describe('y range'),
-    formula: z.union([z.string(), fn<(p: P) => string>('(p) => string')]).optional().describe('Shown above the sliders. Default: function names'),
-    note: z.union([z.string(), fn<(p: P) => string>('(p) => string')]).optional(),
+    formula: z.union([z.string(), fn<(p: P) => string>('(p: Record<string, number>) => string')]).optional().describe('Shown above the sliders. Default: function names'),
+    note: z.union([z.string(), fn<(p: P) => string>('(p: Record<string, number>) => string')]).optional(),
   }),
   snippet: {
     title: 'Transforming a parabola',

@@ -18,6 +18,7 @@ export const formula = defineContract({
   pill: 'Formula',
   purpose: 'A big formula where each named part is explainable (hover or click to highlight it and read what it means), plus an optional "Try it" calculator.',
   whenToUse: 'Introducing any formula or equation: physics, finance, statistics, chemistry. Name every meaningful symbol; leave operators plain.',
+  notes: ['A part can be a single symbol ("m") or a group that is explained as one idea ("(−b ± √(b² − 4ac))"). The calculator shows "—" when f throws or returns NaN/Infinity, so pick default values that give a real answer.'],
   schema: z.object({
     title: z.string().default(''),
     parts: z.array(FormulaPart).min(1).describe('The formula split into parts, left to right'),
